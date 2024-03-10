@@ -6,15 +6,18 @@ TagManager:
   tags:
   - Ennemy
   - EnnemyAttack
+  - Ground
+  - Enm1
+  - chAtk
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Player
   - Water
   - UI
+  - Ennemy
   - Ground
-  - 
   - 
   - 
   - 

@@ -22,33 +22,58 @@ public class MovementController : MonoBehaviour
     private int idleCheck=5;
 
 
+    private bool canDash = true;
+    private bool isDashing;
+    [SerializeField] private float dashingPower = 24f;
+    [SerializeField] private float dashingTime = 0.2f;
+    [SerializeField] private float dashingCooldown = 1f;
+
+    private float originalGravity;
+    private float fastFallGravity;
+
+
     Animator animator;
     private void Start()
     {
         rb= GetComponent<Rigidbody2D>();
+        originalGravity = rb.gravityScale;
+        fastFallGravity = rb.gravityScale * 3;
         animator= GetComponent<Animator>();
         _collider= GetComponent<Collider2D>();
     }
     /*est effectué a chaque image affiché par le jeu*/
     private void Update()
     {
+        isGrounded = IsGrounded();
+        if (isDashing)
+        {
+            return;
+        }
+        
         if (canMove)
         {
-            isGrounded=IsGrounded();
             horizontal = Input.GetAxisRaw("Horizontal");
             Flip();
             HandleAttack();
-            Animate();
+            HandleDash();
+            HandleJump();
+            HandleFall();
         }
+        animator.SetFloat("Vy", rb.velocity.y);
+        Animate();
     }
 
     /*Peut etre effectuer 0, 1 ou plusieurs fois a chaque image en fonction des parametres tout ce qui a un rapport avec la physique doit etre effectuer dans le fixedUpdate */
     private void FixedUpdate()
     {
-        rb.velocity=new Vector2(horizontal*speed,rb.velocity.y);
-        animator.SetFloat("Vy", rb.velocity.y);
-
-        HandleJump();
+        if (isDashing)
+        {
+            return;
+        }
+        if (canMove)
+        {
+            rb.velocity = new Vector2(horizontal * speed, rb.velocity.y);
+        }
         
     }
 
@@ -64,10 +89,23 @@ public class MovementController : MonoBehaviour
             animator.SetTrigger("jump");
         }
 
-        if (Input.GetButtonUp("Jump"))
+        if (Input.GetButtonUp("Jump") && rb.velocity.y>0f)
         {
             rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y * 0.5f);
         }
+    }
+    private void HandleFall()
+    {
+        if (Input.GetAxis("Vertical") < 0)
+        {
+            rb.gravityScale = fastFallGravity;
+        }
+        else
+        {
+            rb.gravityScale = originalGravity;
+
+        }
+
     }
 
     /*
@@ -96,36 +134,48 @@ public class MovementController : MonoBehaviour
 
         }
     }
+
+    private void HandleDash()
+    {
+        if (Input.GetKeyDown(KeyCode.LeftShift) && canDash  && isGrounded)
+        {
+            StartCoroutine(Dash());
+        }
+    }
     /*
      * controle les animations du joueur
      si il doit etre en train de tomber, courir ou etre a l'arret
     */
     private void Animate()
     {
-        if (isGrounded)
+        if (!isDashing)
         {
-            animator.SetBool("isFalling", false);
-            if (rb.velocity.x != 0f)
+            if (isGrounded)
             {
-                animator.SetBool("isRunning", true);
-                idleCheck = 5;
-            }
-            else
-            {
-                if (idleCheck > 0)
+                animator.SetBool("isFalling", false);
+                if (horizontal!= 0f)
                 {
-                    idleCheck--;
+                    animator.SetBool("isRunning", true);
+                    idleCheck = 5;
                 }
                 else
                 {
-                    animator.SetBool("isRunning", false);
+                    if (idleCheck > 0)
+                    {
+                        idleCheck--;
+                    }
+                    else
+                    {
+                        animator.SetBool("isRunning", false);
+                    }
                 }
             }
+            else
+            {
+                animator.SetBool("isFalling", true);
+            }
         }
-        else
-        {
-            animator.SetBool("isFalling", true);
-        }
+        
     }
     //TODO: dash, attaque, détails:delai entre chute et fin de possibilité de saut
 
@@ -145,11 +195,34 @@ public class MovementController : MonoBehaviour
 
     public void Hit() {
         canMove = false;
+        horizontal = 0f;
         StartCoroutine(ResetCanMove());
     }
     
+    public void Death()
+    {
+        canMove= false;
+        horizontal = 0f;
+        Time.timeScale = 0f;
+    }
+
     IEnumerator ResetCanMove()
     {
-        yield return null;
+        yield return new WaitForSeconds(staggerTime);
+        canMove = true;
+    }
+
+    IEnumerator Dash()
+    {
+        canDash = false;
+        isDashing = true;
+        float originalGravity = rb.gravityScale;
+        rb.gravityScale = originalGravity * 5f;
+        rb.velocity = new Vector2(transform.localScale.x * dashingPower, 0f);
+        yield return new WaitForSeconds(dashingTime);
+        rb.gravityScale = originalGravity;
+        isDashing = false;
+        yield return new WaitForSeconds(dashingCooldown);
+        canDash = true;
     }
 }

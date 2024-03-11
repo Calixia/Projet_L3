@@ -505,6 +505,22 @@ PrefabInstance:
       propertyPath: jumpPower
       value: 10
       objectReference: {fileID: 0}
+    - target: {fileID: 3046729297621502080, guid: ad5f4a04071b31e47993c5afb24da4b2, type: 3}
+      propertyPath: dashingTime
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3046729297621502080, guid: ad5f4a04071b31e47993c5afb24da4b2, type: 3}
+      propertyPath: staggerTime
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 3046729297621502080, guid: ad5f4a04071b31e47993c5afb24da4b2, type: 3}
+      propertyPath: dashingPower
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3046729297621502080, guid: ad5f4a04071b31e47993c5afb24da4b2, type: 3}
+      propertyPath: dashingCooldown
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8239646117043076640, guid: ad5f4a04071b31e47993c5afb24da4b2, type: 3}
       propertyPath: ennemyTag
       value: Enm1

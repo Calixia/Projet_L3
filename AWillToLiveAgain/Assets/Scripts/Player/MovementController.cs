@@ -7,6 +7,7 @@ public class MovementController : MonoBehaviour
     private float horizontal;
     [SerializeField] private float speed=8f;
     [SerializeField] private float jumpPower = 16f;
+    private bool canJump = true;
     private bool isFacingRight = true;
 
     private Rigidbody2D rb;
@@ -14,6 +15,7 @@ public class MovementController : MonoBehaviour
 
 
     [SerializeField] private int staggerTime;
+    [SerializeField] private float staggerPower;
     private bool canMove = true;
 
     [SerializeField] private LayerMask groundLayer;
@@ -29,6 +31,7 @@ public class MovementController : MonoBehaviour
     [SerializeField] private float dashingCooldown = 1f;
 
     private float originalGravity;
+    [SerializeField] float fastFallGravityMultiplier;
     private float fastFallGravity;
 
 
@@ -37,7 +40,7 @@ public class MovementController : MonoBehaviour
     {
         rb= GetComponent<Rigidbody2D>();
         originalGravity = rb.gravityScale;
-        fastFallGravity = rb.gravityScale * 3;
+        fastFallGravity = rb.gravityScale * fastFallGravityMultiplier;
         animator= GetComponent<Animator>();
         _collider= GetComponent<Collider2D>();
     }
@@ -83,25 +86,40 @@ public class MovementController : MonoBehaviour
      */
     private void HandleJump()
     {
-        if (Input.GetButtonDown("Jump") && isGrounded)
+        if (canJump)
         {
-            rb.velocity = new Vector2(rb.velocity.x, jumpPower);
-            animator.SetTrigger("jump");
+            if (Input.GetButtonDown("Jump") && isGrounded)
+            {
+                rb.velocity = new Vector2(rb.velocity.x, jumpPower);
+                animator.SetTrigger("jump");
+            }
+            if (Input.GetButtonUp("Jump") && rb.velocity.y > 0f)
+            {
+                rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y * 0.5f);
+                animator.ResetTrigger("jump");
+            }
+            if (rb.velocity.y < 0f)
+            {
+                animator.ResetTrigger("jump");
+            }
         }
-
-        if (Input.GetButtonUp("Jump") && rb.velocity.y>0f)
-        {
-            rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y * 0.5f);
-        }
+        
     }
     private void HandleFall()
     {
         if (Input.GetAxis("Vertical") < 0)
         {
+            canJump = false;
+            if(rb.velocity.y > 0f)
+            {
+                rb.velocity = new Vector2(rb.velocity.x,0f) ;
+            }
             rb.gravityScale = fastFallGravity;
+            //transform.localScale = fastfallScale; AVEC LERP!!! réduis la taille pour rendre le fait qu'on tombe plus vite plus visible (pas extremement important)
         }
         else
         {
+            canJump = true;
             rb.gravityScale = originalGravity;
 
         }
@@ -193,22 +211,30 @@ public class MovementController : MonoBehaviour
         return false;
     }
 
-    public void Hit() {
+    public void Hit(Vector2 force) {
+        if (force.x >= 0)
+            force.x = 0.5f;
+        else
+            force.x = -0.5f;
+        force.y = 0.5f;
+        rb.velocity = Vector2.zero;
+        rb.AddForce(force*staggerPower);
         canMove = false;
         horizontal = 0f;
+        animator.SetTrigger("hurt");
         StartCoroutine(ResetCanMove());
     }
-    
+
     public void Death()
     {
-        canMove= false;
+        canMove = false;
         horizontal = 0f;
         Time.timeScale = 0f;
     }
-
     IEnumerator ResetCanMove()
     {
         yield return new WaitForSeconds(staggerTime);
+        animator.ResetTrigger("hurt");
         canMove = true;
     }
 

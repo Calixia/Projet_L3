@@ -29,7 +29,7 @@ public class Player_scrpt : MonoBehaviour
     //mouvement conditions
     private float H_Mouvement = 0.0f;
     private bool jump;
-    private bool gCheck = false;
+    public bool gCheck = false;
 
     //actions
 
@@ -159,7 +159,7 @@ public class Player_scrpt : MonoBehaviour
     {
         if (!gCheck && myRb.velocity.y < 0 && myRb.gravityScale != fallGravity)
         {
-            Debug.Log("Gravity changed, objt heavier");
+            //Debug.Log("Gravity changed, objt heavier");
             myRb.gravityScale = fallGravity;
         }
     }
@@ -401,8 +401,6 @@ public class Player_scrpt : MonoBehaviour
             //myAni.SetTrigger("Jumping");
 
             //myAni.SetBool("test", true);
-
-            Debug.Log("he jumped!");
             
             myRb.gravityScale = 5;
 
@@ -449,7 +447,7 @@ public class Player_scrpt : MonoBehaviour
 
             //Physics2D.IgnoreLayerCollision(3, 8, true);
 
-            myBxC.excludeLayers = LayerMask.GetMask("Enemy");
+            myBxC.excludeLayers = LayerMask.GetMask("Enemies");
 
             pushBackDir = choseDir(collision.contacts[0].point.x);
 

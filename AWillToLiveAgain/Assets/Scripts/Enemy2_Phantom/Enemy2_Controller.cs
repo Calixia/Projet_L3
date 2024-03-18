@@ -89,14 +89,6 @@ public class Enemy2_scrpt : MonoBehaviour
         }
 
 
-        if (!isDead)
-        {
-            Mouvement(currentAction);
-        }
-        else
-        {
-            toResurrect();
-        }
 
     }
 
@@ -118,6 +110,14 @@ public class Enemy2_scrpt : MonoBehaviour
             getDirNearestPlayer();
         }
 
+         if (!isDead)
+        {
+            Mouvement(currentAction);
+        }
+        else
+        {
+            toResurrect();
+        }
     }
 
     private void objectDirection()
@@ -295,7 +295,7 @@ public class Enemy2_scrpt : MonoBehaviour
     {
         if (myRb.velocity.x < 8f && myRb.velocity.x > -8f)
         {
-            myRb.AddForce(NearDirToPLayer * 4f);
+            myRb.AddForce(NearDirToPLayer * 6f);
         }
         else
         {
@@ -307,7 +307,7 @@ public class Enemy2_scrpt : MonoBehaviour
 
         if (myRb.velocity.y < 8f && myRb.velocity.y > -8f)
         {
-            myRb.AddForce(NearDirToPLayer * 4f);
+            myRb.AddForce(NearDirToPLayer * 6f);
         }
         else
         {
@@ -322,25 +322,27 @@ public class Enemy2_scrpt : MonoBehaviour
     private void getDirNearestPlayer()
     {
         /*calculate the nearest direction to the player,
-        * 1. take current enemy pos
-        * 2. add a unit vector from the possible direction to the enemy pos 
-        * 3. compare the distance from this new vector to the player to the distance from the current "nearest" unit vector to the player
-        */
-        
+         * 1. take current enemy pos
+         * 2. add a unit vector from the possible direction to the enemy pos 
+         * 3. compare the distance from this new vector to the player to the distance from the current "nearest" unit vector to the player
+         */
+        Vector2[] possibleDir = { new Vector2(-1, -1), new Vector2(-1, 0), new Vector2(-1, 1), new Vector2(0, -1), new Vector2(0, 1), new Vector2(1, -1), new Vector2(1, 0), new Vector2(1, 1) };
+
         Vector2 posToTest, currentNpos;
 
 
-        for (float i = 0; i < (Mathf.PI * 2); i = i + 0.1f)
+        foreach (Vector2 directions in possibleDir)
         {
-            posToTest = new Vector2(transform.position.x + Mathf.Cos(i), transform.position.y + Mathf.Sin(i));
+            posToTest = new Vector2(transform.position.x + directions.x, transform.position.y + directions.y);
             currentNpos = new Vector2(transform.position.x + NearDirToPLayer.x, transform.position.y + NearDirToPLayer.y);
 
 
             if (Vector2.Distance(posToTest, thePlayer.transform.position) < Vector2.Distance(currentNpos, thePlayer.transform.position))
             {
-                NearDirToPLayer = new Vector2(Mathf.Cos(i), Mathf.Sin(i));
+                NearDirToPLayer = directions;
             }
         }
+
 
     }
 

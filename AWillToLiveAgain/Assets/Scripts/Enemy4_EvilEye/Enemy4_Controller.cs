@@ -110,7 +110,7 @@ public class Enemy4_Controller : MonoBehaviour
             else
             {
                 //if is in the ground , destroy
-                Destroy();
+                gonnaDestroy();
             }
             
         }
@@ -133,7 +133,7 @@ public class Enemy4_Controller : MonoBehaviour
     }
 
 
-    private void Destroy()
+    private void gonnaDestroy()
     {
         timer += Time.deltaTime;
 

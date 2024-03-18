@@ -28,12 +28,12 @@ public class Player_scrpt : MonoBehaviour
 
     //mouvement conditions
     private float H_Mouvement = 0.0f;
-    private bool jump;
+    public bool jump;
     public bool gCheck = false;
 
     //actions
 
-    private bool isHit = false;
+    public bool isHit = false;
     public bool isAttacking =false;
 
     //Coldowns
@@ -60,14 +60,7 @@ public class Player_scrpt : MonoBehaviour
     void Update()
     {
 
-        /*if (myRb.velocity.x < -0.0001f)
-        {
-            transform.rotation = Quaternion.Euler(0f, 180f, 0f);
-        }
-        else
-        {
-            transform.rotation = Quaternion.Euler(0f, 0f, 0f);
-        }*/
+        
 
         animationManager();
 
@@ -444,8 +437,6 @@ public class Player_scrpt : MonoBehaviour
         {
 
             isHit = true;
-
-            //Physics2D.IgnoreLayerCollision(3, 8, true);
 
             myBxC.excludeLayers = LayerMask.GetMask("Enemies");
 

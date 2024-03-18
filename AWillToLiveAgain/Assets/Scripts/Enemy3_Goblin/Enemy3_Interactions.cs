@@ -7,6 +7,7 @@ public class Enemy3_Interactions : MonoBehaviour
     private Enemy3 Controller;
 
 
+
     // Start is called before the first frame update
     void Start()
     {
@@ -16,7 +17,7 @@ public class Enemy3_Interactions : MonoBehaviour
 
     public bool groundChck()
     {
-        RaycastHit2D GrounfChckBoxCast = Physics2D.BoxCast(Controller.myBxC.bounds.center - new Vector3(0, 0.55f), Controller.myBxC.bounds.size - new Vector3(0f, 1f), 0f, Vector2.down, 0f, Controller.theGroundMask);
+        RaycastHit2D GrounfChckBoxCast = Physics2D.BoxCast(Controller.myBxC.bounds.center - new Vector3(0, 0.55f), Controller.myBxC.bounds.size - new Vector3(0f, 1f), 0f, Vector2.down, 0.09f, Controller.theGroundMask);
 
 
         return GrounfChckBoxCast.collider;
@@ -114,19 +115,66 @@ public class Enemy3_Interactions : MonoBehaviour
                 Gizmos.color = Color.black;
                 Gizmos.DrawRay(Controller.myBxC.bounds.center, Controller.thePlayer.transform.position - Controller.transform.position);
             }
+
+
+            
+
+
+            
         }
     }
 
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.CompareTag("Player"))
+        if (Controller.myBxC.IsTouching(collision.collider) && collision.gameObject.CompareTag("Player"))
         {
-            Controller.myRb.isKinematic = true;
+            if (Controller.Health > 0)
+            {
+                Controller.myRb.isKinematic = true;
+            }
+
             Controller.myRb.velocity = Vector3.zero;
 
         }
+
+        if (Controller.myBxC.IsTouching(collision.collider) && collision.collider.gameObject.CompareTag("chAtk") && !Controller.isHit && !Controller.isDead)
+        {
+            Controller.Health--;
+
+            if (Controller.Health < 0)
+            {
+                Controller.Health = 0;
+            }
+
+            if (Controller.Health > 0) { 
+                Controller.Hitted();
+            }
+            int pushBackDir = choseDir(collision.contacts[0].point.x);
+            Controller.setStaggerControlPoints(pushBackDir);
+        }
+
+
     }
+
+
+    private int choseDir(float x_contactPt)
+    {
+        if (x_contactPt - transform.position.x < 0)
+        {
+            return 1;
+        }
+        else if (x_contactPt - transform.position.x > 0)
+        {
+            return -1;
+        }
+        else
+        {
+            return 0;
+        }
+
+    }
+
 
     private void OnCollisionExit2D(Collision2D collision)
     {
@@ -146,6 +194,8 @@ public class Enemy3_Interactions : MonoBehaviour
         {
             Controller.thePlayer = collision.gameObject;
             Controller.playerController = collision.gameObject.GetComponent<Player_scrpt>();
+            Controller.myBxTrg.enabled = false;
+            Controller.isPursuing = true;
         }
     }
 

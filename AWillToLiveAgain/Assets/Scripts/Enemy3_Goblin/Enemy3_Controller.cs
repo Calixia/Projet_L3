@@ -3,9 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-/// <summary>
-/// Fix on air mouvement, attack manager
-/// </summary>
 public class Enemy3 : MonoBehaviour
 {
     // at start
@@ -13,42 +10,56 @@ public class Enemy3 : MonoBehaviour
     public Rigidbody2D myRb;
     public Animator myAni;
     public BoxCollider2D myBxC;
-    private BoxCollider2D myBxTrg;
+    public BoxCollider2D myBxTrg;
     public LayerMask theGroundMask;
+
     private Enemy3_Interactions InteractionManager;
+    private Enemy3_Jump Jump_Script;
+
     public Vector2 limitL, limitR;
+    private AnimationClip[] Clips;
 
 
     //Status
     public char currentAction = 'W';
     public char nextAction = 'L';
-    private int Health = 2;
+    public int Health = 2;
 
     private bool edgCheck = false;
     private bool obsCheck = false;
     private bool gCheck = false;
+
+    private bool onColdown = false;
+
+    private bool notOnsight = false;
+    public bool isPursuing = false;
+    public bool isAttacking = false;
+    public bool Jump = false;
+    public bool isHit = false;
+
+
     public bool isDead = false;
-    private bool Onsight = false;
-    private bool isAttacking = false;
-    private bool Jump = false;
 
 
     //parametrage
     public Vector2 NearDirToPLayer = Vector2.zero;
-    private Vector2 playerJumped, playerLanded = Vector2.zero;
     public Player_scrpt playerController;
 
-        //Jump - Berzier cuadratic
-        [SerializeField] private float jumpSpeed = 0.8f;
-        private float t = 0f;
-       // private Vector3 P0;
-        //private Vector3 P1;
-        //private Vector3 P2;
+    private float staggerDur = 0f;
+    private float attackDur = 0f;
+
+    //Jump - Berzier cuadratic
+    [SerializeField] float staggerSpeed = 0.5f;
+        private Vector3 P0hit = Vector2.zero, P1hit = Vector2.zero, P2hit = Vector2.zero;
+        private float t2 = 0f;
 
 
-    private float timer = 0.0f;
-
-    private bool dash = false;
+    //timers
+    private float waitTimer = 0.0f;
+    public float deBugStuck = 0.0f;
+    private float attackTimer = 0.0f;
+    private float atkColdown =0.0f;
+    private float toDestroy = 0.0f;
 
     // Start is called before the first frame update
     void Start()
@@ -58,7 +69,6 @@ public class Enemy3 : MonoBehaviour
         limitL = new Vector2(transform.position.x - 4, transform.position.y);
         limitR = new Vector2(transform.position.x + 4, transform.position.y);
 
-        //Physics2D.IgnoreLayerCollision(8, 8, true);
 
         myRb = GetComponent<Rigidbody2D>();
         myBxC = GetComponent<BoxCollider2D>();
@@ -66,64 +76,84 @@ public class Enemy3 : MonoBehaviour
 
         myAni = GetComponent<Animator>();
         InteractionManager = GetComponent<Enemy3_Interactions>();
+        Jump_Script = GetComponent<Enemy3_Jump>();
 
         theGroundMask = LayerMask.GetMask("Ground");
+
+        getAnimDuration();
     }
+
+    private void getAnimDuration()
+    {
+        Clips = myAni.runtimeAnimatorController.animationClips;
+
+        foreach (AnimationClip clip in Clips)
+        {
+            if (clip.name == "Enm3_hit")
+            {
+                staggerDur = clip.length;
+         
+                
+            }
+
+            if (clip.name == "Enm3_attack")
+            {
+                attackDur = clip.length;
+
+                
+            }
+        }
+
+    }
+
 
     // Update is called once per frame
     void Update()
     {
-        //objectDirection();
+        if (Health == 0 && !isDead)
+        {
+            Dies();
+
+        }
 
 
-        if (!isAttacking)
+        if (currentAction == 'P' || currentAction == 'J')
+        {
+            objectDirection();
+        }
+         
+        
+
+        if (!isPursuing && !isAttacking)
         {
             limitL = new Vector2(limitL.x, transform.position.y);
             limitR = new Vector2(limitR.x, transform.position.y);
+
+            edgCheck = InteractionManager.edgeCheck();
+            obsCheck = InteractionManager.obstacleCheck();
+
         }
-
-        if (currentAction == 'A')
-        {
-            myBxTrg.enabled = false;
-            isAttacking = true;
-            objectDirection();
-        }
-
-
-        edgCheck = InteractionManager.edgeCheck();
+     
         gCheck = InteractionManager.groundChck();
-        obsCheck = InteractionManager.obstacleCheck();
-
-        //dash = Input.GetKeyDown(KeyCode.T);
-
-        if (!isAttacking)
-        {
-            Interactions();
-        }
-
+       
         
-        if (thePlayer != null && currentAction != 'J')
+        if (thePlayer != null && currentAction != 'J' && currentAction != 'A' && (Jump_Script.playerJumped == Vector2.zero && Jump_Script.playerLanded == Vector2.zero) && !isDead)
         {
-            Onsight = InteractionManager.PlayerOnSight();
+            notOnsight = InteractionManager.PlayerOnSight();
 
-            //prototype
-            if (!Onsight)
-            {
-                currentAction = 'A';
-                nextAction = 'W';
-            }
-
-
-
+            LOS();
         }
 
 
-
-
-        if (!isDead)
+        if(currentAction == 'J')
         {
-            myAni.SetFloat("Running", Mathf.Abs(myRb.velocity.x));
-            Mouvement(currentAction);
+            deBugStuck += Time.deltaTime;
+
+            if(deBugStuck > 4f)
+            {
+                currentAction = 'P';
+                deBugStuck = 0.0f;
+            }
         }
 
 
@@ -131,17 +161,6 @@ public class Enemy3 : MonoBehaviour
 
     private void Interactions()
     {
-
-        if (!gCheck )
-        {
-            if (currentAction != 'W')
-            {
-                //Just to be sure, if for any reason the GameObject it's in the air it'll wait
-                nextAction = currentAction;
-                currentAction = 'W';
-            }
-        }
-
 
         if (!edgCheck)
         {
@@ -168,7 +187,7 @@ public class Enemy3 : MonoBehaviour
 
                 limitL = new Vector2(transform.position.x - 0.2f, limitL.y);
                 currentAction = 'R';
-                //nextDir = 'W';
+               
 
 
                 break;
@@ -178,7 +197,7 @@ public class Enemy3 : MonoBehaviour
 
                 limitR = new Vector2(transform.position.x + 0.2f, limitL.y);
                 currentAction = 'L';
-                //nextDir = 'L';
+          
 
                 break;
         }
@@ -207,112 +226,145 @@ public class Enemy3 : MonoBehaviour
     }
     
 
+    private void LOS()
+    {
+        if (notOnsight)
+        {
+            currentAction = 'W';
+            nextAction = 'P';
+        }
+        //prototype
+        if (!notOnsight)
+        {
+            currentAction = 'P';
+            nextAction = 'W';
+
+            if (waitTimer != 0.0f)
+            {
+                waitTimer = 0.0f;
+            }
+
+        }
+    }
+
 
 
     private void objectDirection()
     {
 
-        if (myRb.velocity.x < 0)
+        if (myRb.velocity.x < 0f)
         {
             transform.rotation = Quaternion.Euler(0f, 180f, 0f);
         }
         
-        
-        if(myRb.velocity.x > 0)
+        if(myRb.velocity.x > 0f)
         {
             transform.rotation = Quaternion.Euler(0f, 0f, 0f);
         }
+
+
+        if(myRb.velocity.x == 0f)
+        {
+            if(thePlayer.transform.position.x < this.transform.position.x)
+            {
+                transform.rotation = Quaternion.Euler(0f, 180f, 0f);
+            }
+            else
+            {
+                transform.rotation = Quaternion.Euler(0f, 0f, 0f);
+            }
+        }
+
+
+
+       
 
     }
 
 
     private void FixedUpdate()
     {
-        if (dash)
-        {
-            myRb.AddForce(Vector2.right *12, ForceMode2D.Impulse);
 
-        }
+        
 
-        if (currentAction == 'A')
+        if (currentAction == 'P')
         {
             getDirNearestPlayer();
 
-
-            if (playerJumped == Vector2.zero || playerLanded == Vector2.zero)
+            if (gCheck)
             {
-
-                if (!playerController.gCheck && playerJumped == Vector2.zero)
-                {//catches if the player jumps  for the first time and saves the position
-                    Debug.Log("Goblin has registered player jumping");
-                    playerJumped = thePlayer.transform.position;
-                }
-
-                if (playerController.gCheck && playerJumped != Vector2.zero)
-                {//Catches if the player has landed after jumping
-                    if (thePlayer.transform.position.y > playerJumped.y)
-                    {
-                        Debug.Log("Goblin has registered player landed");
-                        playerLanded = thePlayer.transform.position;
-
-                        currentAction = 'J';
-                        nextAction = 'A';
-
-                    }
-                    else
-                    {
-                        //the player landed in the same height he jumped
-                        // so  vectors are reset
-                        playerJumped = Vector2.zero;
-                        playerLanded = Vector2.zero;
-                    }
-
-                }
+                Jump_Script.resgisterJumpLanding();
             }
 
+          
+        }
 
+        if (!isPursuing && !isAttacking)
+        {
+
+            Interactions();
 
         }
 
 
+
+
+        if (!isHit)
+        {
+            
+            myAni.SetFloat("Running", Mathf.Abs(myRb.velocity.x));
+            Mouvement(currentAction);
+        }
+        
+        if (isHit && !isDead)
+        {
+            pushBack();
+        }
+        
+
+        if (isDead)
+        {
+            
+            if (gCheck)
+            {
+                myRb.velocity = Vector2.zero;
+                myRb.gravityScale = 0f;
+                
+                
+                if (myAni.GetCurrentAnimatorStateInfo(0).normalizedTime > 1 && !myAni.IsInTransition(0) && currentAction !='D')
+                {
+                    myAni.SetBool("OnGround", true);
+                    myAni.SetBool("Dead", false);
+
+                    currentAction = 'D';
+                    nextAction = 'W';
+                }
+               
+
+            }
+
+        }
+
     }
 
 
-    private void guidedJump()
+    public void setStaggerControlPoints(int x_sign)
     {
-        Vector3 P0 = playerJumped;
-        Vector3 P2 = playerLanded;
-        Vector3 P1;
+        P0hit = transform.position;
+        P2hit = new Vector2(transform.position.x + 2f * x_sign, transform.position.y);
 
-        if (P0.x > P2.x)
+        if (P0hit.x > P2hit.x)
         {
-            P1 = new Vector3(P2.x + (Vector3.Distance(P0, P2) / 2), P2.y + 5, 0);
+            P1hit = new Vector3(P2hit.x + (Vector3.Distance(P0hit, P2hit) / 2), P2hit.y + 1.5f, 0);
 
         }
         else
         {
-            P1 = new Vector3(P2.x - (Vector3.Distance(P0, P2) / 2), P2.y + 5, 0);
-        }
-
-
-        if (t < 1f)
-        {
-            transform.position = P1 + Mathf.Pow((1 - t), 2) * (P0 - P1) + Mathf.Pow(t, 2) * (P2 - P1);
-
-            t = t + jumpSpeed * Time.deltaTime;
-
-        }
-        else
-        {
-            playerJumped = Vector2.zero;
-            playerLanded = Vector2.zero;
-            t = 0f;
-            Jump = false;
-            //control
-            currentAction = 'W';
-            nextAction = 'W';
+            P1hit = new Vector3(P2hit.x - (Vector3.Distance(P0hit, P2hit) / 2), P2hit.y + 1.5f, 0);
         }
     }
+
+    
 
     private void getDirNearestPlayer()
     {
@@ -332,27 +384,21 @@ public class Enemy3 : MonoBehaviour
     }
 
 
-
-
-
-
     private void Mouvement(char Action)
     {
-
-
-
         switch (Action)
         {
             case 'W':
 
                 waitTime();
 
+
                 break;
 
             case 'L':
-                //transform.Rotate(0f, 180f,0f);
+                
                 transform.rotation = Quaternion.Euler(0f, 180f, 0f);
-                //Debug.Log(transform.rotation.y);
+             
                 myRb.velocity = new Vector2(-5, 0);
                 getDir();
 
@@ -360,91 +406,201 @@ public class Enemy3 : MonoBehaviour
 
             case 'R':
                 transform.rotation = Quaternion.Euler(0f, 0f, 0f);
-                //Debug.Log(transform.rotation.y);
                 myRb.velocity = new Vector2(5, 0);
                 getDir();
 
                 break;
 
             case 'A':
-                if (playerJumped == Vector2.zero && playerLanded == Vector2.zero)
-                {
 
+                if(!onColdown)
+                {
                     attack();
+
+                }
+                else
+                {
+                    attackColdown();
+                }
+
+
+                break;
+
+
+
+            case 'P':
+
+                if (Jump_Script.playerJumped == Vector2.zero && Jump_Script.playerLanded == Vector2.zero)
+                {
+                    pursue();
                 }
                 else
                 {
                     myRb.velocity = Vector2.zero;
                 }
 
+
                 break;
 
             case 'J':
-                Debug.Log(Vector3.Distance(transform.position, playerJumped));
+
 
                 int dir = 1;
 
-                if (transform.position.x > playerJumped.x)
+                if (transform.position.x >  Jump_Script.playerJumped.x)
                 {
                     dir = -1;
 
                 }
 
 
-                if (Vector3.Distance(transform.position, playerJumped) > 0.7f && !Jump)
+                if (Mathf.Abs(Jump_Script.playerJumped.x - transform.position.x) > 0.7f && !Jump)
                 {
+                    if (!gCheck)
+                    {
+                        Jump_Script.playerJumped = Vector2.zero;
+                        Jump_Script.playerLanded = Vector2.zero;
+
+                        currentAction = 'P';
+
+                    }
 
                     myRb.velocity = new Vector2(8f * dir , myRb.velocity.y);
 
                 }else {
-                    //myRb.velocity = Vector2.zero;
-                    Jump = true;
-                    guidedJump(); 
+
+                    if (!Jump)
+                    {
+
+                        if(Mathf.Abs(Jump_Script.playerJumped.y - transform.position.y) > 1f)
+                        {
+
+                            Jump_Script.playerJumped = Vector2.zero;
+                            Jump_Script.playerLanded = Vector2.zero;
+                            currentAction = 'P';
+                        }
+                        else
+                        {
+                            Jump = true;
+                            Jump_Script.playerJumped = this.transform.position;
+                        }
+
+                    }
+                    else
+                    {
+                        myRb.velocity = Vector2.zero;
+                        Jump_Script.guidedJump();
+                    }
+                   
                  }
+                break;
+
+            case 'D':
+
+                gonnaDestroy();
+
                 break;
         }
     }
 
-
-    private void attack()
+    public void Hitted()
     {
-
-        if (myRb.velocity.x < 6f && myRb.velocity.x > -6f)
-        {
-            myRb.AddForce(NearDirToPLayer * 3f);
-        }
-        else
-        {
-
-            myRb.velocity = new Vector2(8f * NearDirToPLayer.x, myRb.velocity.y);
-        }
-
-
+        isHit = true;
+     
+        myAni.SetBool("Hitted", true);
+        Jump_Script.t = 0f;
+        waitTimer = 0f;
+        currentAction = 'W';
+        nextAction = 'W';
+        myBxC.excludeLayers = LayerMask.GetMask("Player");
+        Jump_Script.playerJumped = Vector2.zero;
+        Jump_Script.playerLanded = Vector2.zero;
+        Jump = false;
     }
 
 
-    private void gojump()
+    private void pushBack()
+    {
+
+        if (t2 < 1)
+        {
+            transform.position = P1hit + Mathf.Pow((1 - t2), 2) * (P0hit - P1hit) + Mathf.Pow(t2, 2) * (P2hit - P1hit);
+
+            t2 = t2 + staggerSpeed * Time.deltaTime;
+
+        }
+        else
+        {
+            myAni.SetBool("Hitted", false);
+            currentAction = 'P';
+            nextAction = 'W';
+
+            t2 = 0f;
+            isHit = false;
+            myBxC.excludeLayers = LayerMask.GetMask("Nothing");
+        }
+    }
+
+
+
+    private void pursue()
+    {
+        if(Vector3.Distance(thePlayer.transform.position, this.transform.position) < 1.5f)
+        {
+            myRb.velocity = Vector2.zero;
+            myAni.SetTrigger("Atk");
+            currentAction = 'A';
+            nextAction = 'P';
+
+        }
+        else
+        {
+            myRb.velocity = new Vector2(8f * NearDirToPLayer.x, myRb.velocity.y);
+        }
+    }
+
+    private void attackColdown()
     {
         
 
-            myRb.gravityScale = 5;
+        atkColdown += Time.deltaTime;
 
-            myRb.velocity = new Vector2(myRb.velocity.x, 0);
+        if(atkColdown > 0.6f)
+        {
+            atkColdown = 0.0f;
+            currentAction = 'P';
+            nextAction = 'W';
+            onColdown = false;
+        }
+    }
 
-            myRb.AddForce(Vector2.up * 20, ForceMode2D.Impulse);
+    private void attack()
+    {
+        attackTimer += Time.deltaTime;
+
+        if (attackTimer > attackDur - 0.2 && attackTimer < attackDur)
+        {
+            isAttacking = true;
+        }
+        else if (attackTimer > attackDur)
+        {
+            isAttacking = false;
+            attackTimer = 0.0f;
+            onColdown = true;
+        }
+
     }
 
 
     private void waitTime()
     {
-        //Debug.Log("is waiting");
-        timer += Time.deltaTime;
-        if (timer > 1.5f)
+        waitTimer += Time.deltaTime;
+        if (waitTimer > 1.2f)
         {
             currentAction = nextAction;
             nextAction = 'W';
-            timer = 0.0f;
-            //Debug.Log("Enemy Waiting ends");
+            waitTimer = 0.0f;
+    
 
         }
     }
@@ -465,59 +621,56 @@ public class Enemy3 : MonoBehaviour
             currentAction = 'W';
             nextAction = 'L';
         }
-
-
-        if (currentAction == 'A')
-        {
-            currentAction = 'W';
-
-            if (transform.rotation.y == 0)
-            {
-                nextAction = 'R';
-            }
-            else
-            {
-                nextAction = 'L';
-            }
-        }
-
-
     }
 
 
+    public void Dies()
+    {
+        if(myRb.isKinematic){
+           myRb.isKinematic = false;
+        }
+
+        Debug.Log("goblin dies");
+        isDead = true;
+        myAni.SetBool("Dead", true);
+        currentAction = 'W';
+        nextAction = 'W';
+        myBxC.isTrigger = true;
+    }
+
+    private void gonnaDestroy()
+    {
+        toDestroy += Time.deltaTime;
+
+        if (toDestroy > 4)
+        {
+            Destroy(this.gameObject);
+        }
+    }
 
     private void OnDrawGizmos()
     {
 
-        float BoxCastDir = 0;
-        float RayCastDir = 0;
+        if (Jump_Script != null) { 
 
-        if (transform.rotation.y == 0)
-        {
-            BoxCastDir = -1;
-            RayCastDir = 1;
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(Jump_Script.playerJumped, 0.2f);
+
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(Jump_Script.playerLanded, 0.2f);
 
         }
-        else
-        {
-            BoxCastDir = 1;
-            RayCastDir = -1;
-        }
 
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireCube(limitL, new Vector2(0.5f, 0.5f));
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireCube(limitR, new Vector2(0.5f, 0.5f));
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawWireSphere(P0hit, 0.2f);
 
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireCube(myBxC.bounds.center - new Vector3(0.75f * BoxCastDir, 0.6f), myBxC.bounds.size - new Vector3(0f,0.9f));
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawWireSphere(P1hit, 0.2f);
 
-        Gizmos.color = Color.blue;
-        Gizmos.DrawWireCube(myBxC.bounds.center - new Vector3(0, 0.55f), myBxC.bounds.size - new Vector3(0f,1f));
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawWireSphere(P2hit, 0.2f);
 
 
-        Gizmos.color = Color.red;
-        Gizmos.DrawLine(myBxC.bounds.center + new Vector3(0.4f * RayCastDir, 0f), myBxC.bounds.center + new Vector3(0.9f * RayCastDir, 0f));
     }
 
 

@@ -309,7 +309,7 @@ public class Enemy3 : MonoBehaviour
 
 
 
-        if (!isHit)
+        if (!isHit && !isDead)
         {
             
             myAni.SetFloat("Running", Mathf.Abs(myRb.velocity.x));

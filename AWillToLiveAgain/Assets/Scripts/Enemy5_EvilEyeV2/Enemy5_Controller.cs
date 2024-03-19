@@ -34,18 +34,23 @@ public class Enemy5_Controller : MonoBehaviour
         private Vector3 P0 = Vector2.zero, P1 = Vector2.zero, P2 = Vector2.zero;
         
     public int Health = 2;
-
+    [SerializeField] private float timeToWait = 1.5f;
+    private float gonnaAtkDur = 0.0f;
+   
 
     //Status
     public bool isAttacking = false;
     public bool isDead = false;
     private bool gCheck = false;
     private bool toDestroy = false;
+    public bool isHit = false;
 
 
     //Timers-Coldowns
     public float attackDur = 0.0f;
     private float attackColdown = 3.0f;
+    private float timerToAttack = 0.0f;
+    private float staggerTimer = 0.0f;
     public float timer = 0.0f;
 
 
@@ -78,21 +83,37 @@ public class Enemy5_Controller : MonoBehaviour
 
         theGroundMask = LayerMask.GetMask("Ground");
 
+        getToAttackDuration();
+
     }
+
+    private void getToAttackDuration()
+    {
+        Clips = myAni.runtimeAnimatorController.animationClips;
+
+        foreach (AnimationClip clip in Clips)
+        {
+            if (clip.name == "Enm5_ToAttack")
+            {
+                gonnaAtkDur = clip.length;
+
+
+            }
+
+     
+        }
+
+    }
+
 
     private void FixedUpdate()
     {
         
 
         
+        
 
-
-        if (!isDead)
-        {
-            //if not dead then move
-            Mouvement(currentAction);
-        }
-        else
+        if(isDead)
         {
             //if is dead  and falls to the ground
             if (gCheck && !toDestroy)
@@ -113,14 +134,27 @@ public class Enemy5_Controller : MonoBehaviour
         }
 
 
+        if (isHit)
+        {
+            hittedColdown();
+
+        }
+
+
         // if the player has been spotted by the enemy and is not that far, attack else dont attack
 
-        if (thePlayer != null && !isDead)
+        if (thePlayer != null && !isDead && !isHit)
         {
 
             attack();
         }
 
+
+        if (!isDead && !isHit)
+        {
+            //if not dead then move
+            Mouvement(currentAction);
+        }
 
     }
 
@@ -137,7 +171,7 @@ public class Enemy5_Controller : MonoBehaviour
 
         if(!isAttacking && thePlayer != null)
         {
-            P1 = new Vector2(thePlayer.transform.position.x, thePlayer.transform.position.y - 8f);
+            P1 = new Vector2(thePlayer.transform.position.x, thePlayer.transform.position.y - 9f);
         }
 
         if (Health == 0 && !isDead)
@@ -246,7 +280,7 @@ public class Enemy5_Controller : MonoBehaviour
     private void attack()
     {
 
-        if (!isAttacking && Vector3.Distance(transform.position, thePlayer.transform.position) > 12f)
+        if (!isAttacking && Vector3.Distance(transform.position, thePlayer.transform.position) > 12f && timerToAttack == 0.0f)
         {
             nextAction = currentAction;
             currentAction = 'C';
@@ -260,24 +294,15 @@ public class Enemy5_Controller : MonoBehaviour
                 //attack coldown
 
                 attackColdown += Time.deltaTime;
+
                 if (attackColdown > 2f)
                 {
-                    myAni.SetTrigger("Attack");
-                    isAttacking = true;
-
-                    attackColdown = 0f;
-
-                    P0 = transform.position;
-
-                    if (P0.x < P1.x)
+                    if (timerToAttack == 0.0f)
                     {
-                        P2 = new Vector2(transform.position.x + 8f, transform.position.y);
+                        myAni.SetTrigger("GoingToAtk");
+                    }
+                    goingToAttack();
 
-                    }
-                    else
-                    {
-                        P2 = new Vector2(transform.position.x - 8f, transform.position.y);
-                    }
 
                 }
 
@@ -305,6 +330,7 @@ public class Enemy5_Controller : MonoBehaviour
 
                     t = 0f;
                     isAttacking = false;
+                    myAni.SetBool("Atk", false);
                     transform.position = new Vector2(transform.position.x, P2.y);
                     limitL = new Vector2(transform.position.x - 8, limitL.y);
                     limitR = new Vector2(transform.position.x + 8, limitR.y);
@@ -330,8 +356,61 @@ public class Enemy5_Controller : MonoBehaviour
             currentAction = nextAction;
             nextAction = 'W';
             timer = 0.0f;
-            //Debug.Log("Enemy Waiting ends");
+            
+           
+        }
+    }
 
+    private void goingToAttack()
+    {
+        timerToAttack += Time.deltaTime;
+
+        if ( timerToAttack > gonnaAtkDur)
+        {
+
+            myAni.SetBool("Atk", true);
+            isAttacking = true;
+            attackColdown = 0f;
+            timerToAttack = 0.0f;
+
+            P0 = transform.position;
+
+            if (P0.x < P1.x)
+            {
+                P2 = new Vector2(transform.position.x + 8f, transform.position.y);
+
+            }
+            else
+            {
+                P2 = new Vector2(transform.position.x - 8f, transform.position.y);
+            }
+
+        }
+    }
+
+    public void Hitted()
+    {
+        myRb.velocity = Vector2.zero;
+        isHit = true;
+        myAni.SetTrigger("Hitted");
+        timer = 0f;
+        nextAction = currentAction;
+        currentAction = 'W';
+
+    }
+
+    private void hittedColdown()
+    {
+        staggerTimer += Time.deltaTime;
+
+        if (staggerTimer > 1.5f)
+        {
+            isHit = false;
+            currentAction = nextAction;
+            nextAction = 'W';
+            staggerTimer = 0.0f;
+
+            
         }
     }
 

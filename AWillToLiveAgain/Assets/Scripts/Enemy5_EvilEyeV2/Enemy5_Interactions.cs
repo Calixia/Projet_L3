@@ -39,9 +39,11 @@ public class Enemy5_Interactions : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.collider.gameObject.CompareTag("chAtk") && !Controller.isDead)
+        if (collision.collider.gameObject.CompareTag("chAtk") && !Controller.isDead && !Controller.isHit)
         {
             Controller.Health--;
+            Controller.Hitted();
+
         }
     }
 

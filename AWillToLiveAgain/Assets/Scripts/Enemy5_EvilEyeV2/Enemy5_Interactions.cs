@@ -29,6 +29,8 @@ public class Enemy5_Interactions : MonoBehaviour
         if (collision.gameObject.CompareTag("Player") && !Controller.isDead)
         {
             Controller.thePlayer = collision.gameObject;
+            Controller.currentAction = 'C';
+            Controller.nextAction = 'C';
             Controller.myBxC.enabled = false;
         }
 

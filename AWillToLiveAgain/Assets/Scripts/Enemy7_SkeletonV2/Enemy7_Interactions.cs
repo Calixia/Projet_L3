@@ -2,14 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Enemy1_Ineractions : MonoBehaviour
+public class Enemy7_Interactions : MonoBehaviour
 {
-
-    private Enemy1IA_scrpt Controller;
+    private Enemy7_Controller Controller;
 
     private void Start()
     {
-        Controller = GetComponent<Enemy1IA_scrpt>();
+        Controller = GetComponent<Enemy7_Controller>();
     }
 
 
@@ -94,7 +93,7 @@ public class Enemy1_Ineractions : MonoBehaviour
             RayCastDir = -1;
         }
 
-        if (Controller != null )
+        if (Controller != null)
         {
             Gizmos.color = Color.red;
             Gizmos.DrawWireCube(Controller.limitL, new Vector2(0.5f, 0.5f));
@@ -133,8 +132,8 @@ public class Enemy1_Ineractions : MonoBehaviour
         {
 
             Debug.Log("enemy is Attacked ");
-            Controller.Health--;
-     
+
+            Controller.Dies();
 
         }
 
@@ -164,5 +163,4 @@ public class Enemy1_Ineractions : MonoBehaviour
             Controller.timer = 0.0f;
         }
     }
-
 }

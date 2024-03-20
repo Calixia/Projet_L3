@@ -1,41 +1,38 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
-public class Enemy1IA_scrpt : MonoBehaviour
+public class Enemy7_Controller : MonoBehaviour
 {
 
     //Variables to start 
 
-        //Horizontal mouvement Limits
+    //Horizontal mouvement Limits
     public Vector2 limitL, limitR;
 
     public Rigidbody2D myRb;
     public Animator myAni;
     public BoxCollider2D myBxC;
     public LayerMask theGroundMask;
-    private Enemy1_Ineractions InteractionManager;
+    private Enemy7_Interactions InteractionManager;
     private AnimationClip[] Clips;
 
 
     //Parametrage
 
-     //Possible actions : W - Waiting, A - Attacking, L - Going Left, R - Going Right 
+    //Possible actions : W - Waiting, A - Attacking, L - Going Left, R - Going Right 
     public char currentAction = 'W';
     public char nextAction = 'L';
-    public int Health = 1;
 
     //Status
     public bool isAttacking = false;
     public bool isDead = false;
 
-        //Edge Check
+    //Edge Check
     private bool edgCheck = false;
-        //Groung Check
+    //Groung Check
     private bool gCheck = false;
-        //Obstacule Check
+    //Obstacule Check
     private bool obsCheck = false;
 
 
@@ -49,43 +46,45 @@ public class Enemy1IA_scrpt : MonoBehaviour
     void Start()
     {
         //Set Horizontal Limits
-        limitL = new Vector2(transform.position.x - 4, transform.position.y);
-        limitR = new Vector2(transform.position.x + 4, transform.position.y);
+        limitL = new Vector2(transform.position.x - 7, transform.position.y);
+        limitR = new Vector2(transform.position.x + 7, transform.position.y);
 
         //Ignore other enemies collisions
         Physics2D.IgnoreLayerCollision(8, 8);
-        
-        
+
+
 
         //Chose a Random Direction to go First
         int rand = UnityEngine.Random.Range(0, 2);
-        if (rand == 0){
+        if (rand == 0)
+        {
             nextAction = 'L';
         }
-        else{
+        else
+        {
             nextAction = 'R';
         }
-        
+
         myRb = GetComponent<Rigidbody2D>();
         myAni = GetComponent<Animator>();
-        InteractionManager = GetComponent<Enemy1_Ineractions>();
+        InteractionManager = GetComponent<Enemy7_Interactions>();
         theGroundMask = LayerMask.GetMask("Ground");
         getAttackDur();
 
     }
 
-   
+
     private void getAttackDur()
     {
         //Fonction to find the attack animation and calculate duration
-            //We take all the clips in the game
+        //We take all the clips in the game
         Clips = myAni.runtimeAnimatorController.animationClips;
 
         foreach (AnimationClip clip in Clips)
         {
 
             if (clip.name == "Attack_en1")
-            {   
+            {
                 //We find the animation clip and stock the duration taht the attack must have to match the animation
                 attackDur = clip.length;
 
@@ -107,11 +106,6 @@ public class Enemy1IA_scrpt : MonoBehaviour
         limitL = new Vector2(limitL.x, transform.position.y);
         limitR = new Vector2(limitR.x, transform.position.y);
 
-        if (Health == 0 && !isDead)
-        {
-            Dies();
-        }
-
 
         edgCheck = InteractionManager.edgeCheck();
         gCheck = InteractionManager.groundChck();
@@ -120,8 +114,8 @@ public class Enemy1IA_scrpt : MonoBehaviour
 
         if (!gCheck)
         {
-  
-            if(currentAction != 'W')
+
+            if (currentAction != 'W')
             {
                 //Just to be sure, if for any reason the GameObject it's in the air it'll wait
                 nextAction = currentAction;
@@ -129,7 +123,7 @@ public class Enemy1IA_scrpt : MonoBehaviour
             }
 
         }
-  
+
 
 
 
@@ -186,7 +180,7 @@ public class Enemy1IA_scrpt : MonoBehaviour
             myAni.SetFloat("walk", Mathf.Abs(myRb.velocity.x));
         }
 
-   
+
 
 
     }
@@ -196,7 +190,7 @@ public class Enemy1IA_scrpt : MonoBehaviour
 
     private void waitTime()
     {
-        
+
         //Debug.Log("is waiting");
         timer += Time.deltaTime;
         if (timer > 1.5f)
@@ -228,13 +222,13 @@ public class Enemy1IA_scrpt : MonoBehaviour
         }
 
 
-        if(currentAction == 'A')
+        if (currentAction == 'A')
         {
             currentAction = 'W';
 
             if (transform.rotation.y == 0)
             {
-                 nextAction = 'R';
+                nextAction = 'R';
             }
             else
             {
@@ -255,22 +249,23 @@ public class Enemy1IA_scrpt : MonoBehaviour
         myRb.gravityScale = 0f;
         isDead = true;
     }
-    private void Mouvement(char Action) {
-        
-    
+    private void Mouvement(char Action)
+    {
 
-        switch(Action)
+
+
+        switch (Action)
         {
-            case 'W' :
-              
+            case 'W':
+
                 waitTime();
 
                 break;
 
-            case 'L' :
-              
+            case 'L':
+
                 transform.rotation = Quaternion.Euler(0f, 180f, 0f);
-                myRb.velocity = new Vector2(-5, 0);
+                myRb.velocity = new Vector2(-7, 0);
                 getDir();
 
                 break;
@@ -278,7 +273,7 @@ public class Enemy1IA_scrpt : MonoBehaviour
             case 'R':
 
                 transform.rotation = Quaternion.Euler(0f, 0f, 0f);
-                myRb.velocity = new Vector2(5, 0);
+                myRb.velocity = new Vector2(7, 0);
                 getDir();
 
                 break;
@@ -348,7 +343,4 @@ public class Enemy1IA_scrpt : MonoBehaviour
             Destroy(this.gameObject);
         }
     }
-
-
 }
-

@@ -263,11 +263,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 8
-  jumpPower: 8
-  staggerTime: 4
+  jumpPower: 10
+  staggerTime: 1
+  staggerPower: 400
   groundLayer:
     serializedVersion: 2
     m_Bits: 128
+  dashingPower: 5
+  dashingTime: 0.2
+  dashingCooldown: 1
+  fallGravityMultiplier: 2
+  fastFallGravityMultiplier: 3
 --- !u!114 &8239646117043076640
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -280,8 +286,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2a62b69fe7355a94fb841e45740141f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 3
+  maxHealth: 10
+  currentHealth: 0
   canBeDamaged: 1
-  staggerTime: 4
-  ennemyTag: Ennemy
+  staggerTime: 1
+  ennemyTag: Enm1
   ennemyAttackTag: EnnemyAttack

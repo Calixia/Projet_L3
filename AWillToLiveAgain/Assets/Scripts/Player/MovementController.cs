@@ -4,45 +4,71 @@ using UnityEngine;
 
 public class MovementController : MonoBehaviour
 {
+    [Header("Movement settings")]
+    [SerializeField] private float speed = 8f;
     private float horizontal;
-    [SerializeField] private float speed=8f;
+    [HideInInspector] public bool isFacingRight = true;
+
+    [Header("jump settings")]
     [SerializeField] private float jumpPower = 16f;
     private bool canJump = true;
-    private bool isFacingRight = true;
+    private bool isCrouched = false;
+    
 
     private Rigidbody2D rb;
     private Collider2D _collider;
 
+    [Header("Bow settings")]
+    [SerializeField] GameObject arrowPrefab;
+    [SerializeField] private float arrowCooldown;
+    [SerializeField] private float arrowMaxDistance;
 
+    private bool canShootArrow = true;
+
+    [Header("Stagger settings")]
     [SerializeField] private int staggerTime;
     [SerializeField] private float staggerPower;
     private bool canMove = true;
 
+    [Header("Grounded settings")]
     [SerializeField] private LayerMask groundLayer;
     private bool isGrounded;
 
     private int idleCheck=5;
 
-
-    private bool canDash = true;
-    private bool isDashing;
+    [Header("dash settings")]
     [SerializeField] private float dashingPower = 24f;
     [SerializeField] private float dashingTime = 0.2f;
     [SerializeField] private float dashingCooldown = 1f;
+    private bool canDash = true;
+    private bool isDashing;
 
+    [Header("fall settings")]
+    [SerializeField] float fallGravityMultiplier=2;
+    [SerializeField] float fastFallGravityMultiplier=3;
     private float originalGravity;
-    [SerializeField] float fastFallGravityMultiplier;
+    private float fallGravity;
     private float fastFallGravity;
 
+    [Header("Camera settings")]
+    [SerializeField] private GameObject cameraFollowObject;
+    private CameraFollowObject cameraFollowObjectScript;
+    private float fallSpeedDampingChangeThreshold;
 
     Animator animator;
     private void Start()
     {
         rb= GetComponent<Rigidbody2D>();
         originalGravity = rb.gravityScale;
+        fallGravity = rb.gravityScale * fallGravityMultiplier;
+
         fastFallGravity = rb.gravityScale * fastFallGravityMultiplier;
         animator= GetComponent<Animator>();
         _collider= GetComponent<Collider2D>();
+
+        cameraFollowObjectScript=cameraFollowObject.GetComponent<CameraFollowObject>();
+
+        fallSpeedDampingChangeThreshold = CameraManager.instance.fallSpeedYDampingChangeThreshold;
     }
     /*est effectué a chaque image affiché par le jeu*/
     private void Update()
@@ -61,6 +87,11 @@ public class MovementController : MonoBehaviour
             HandleDash();
             HandleJump();
             HandleFall();
+        }
+        //if player is falling past a certain threshold
+        if(rb.velocity.y<fallSpeedDampingChangeThreshold && !CameraManager.instance.IsLerpingYDamping && !CameraManager.instance.LerpedFromPlayerFalling) 
+        {
+            CameraManager.instance.LerpYDamping(true);
         }
         animator.SetFloat("Vy", rb.velocity.y);
         Animate();
@@ -107,21 +138,31 @@ public class MovementController : MonoBehaviour
     }
     private void HandleFall()
     {
+        
         if (Input.GetAxis("Vertical") < 0)
         {
             canJump = false;
-            if(rb.velocity.y > 0f)
+            isCrouched = true;
+            if (rb.velocity.y > 0f)
             {
                 rb.velocity = new Vector2(rb.velocity.x,0f) ;
             }
             rb.gravityScale = fastFallGravity;
+            
             //transform.localScale = fastfallScale; AVEC LERP!!! réduis la taille pour rendre le fait qu'on tombe plus vite plus visible (pas extremement important)
         }
         else
         {
             canJump = true;
-            rb.gravityScale = originalGravity;
-
+            if (rb.velocity.y < 0f)
+            {
+                rb.gravityScale = fallGravity;
+            }
+            else
+            {
+                rb.gravityScale = originalGravity;
+            }
+            isCrouched = false;
         }
 
     }
@@ -137,6 +178,7 @@ public class MovementController : MonoBehaviour
             Vector3 localScale = transform.localScale;
             localScale.x*=-1f;
             transform.localScale = localScale;
+            cameraFollowObjectScript.CallTurn();
         }
     }
 
@@ -150,6 +192,11 @@ public class MovementController : MonoBehaviour
         {
             animator.SetTrigger("Attack");
 
+        }
+        if (Input.GetMouseButtonDown(1) && canShootArrow)
+        {
+            
+            StartCoroutine(Arrow());
         }
     }
 
@@ -168,8 +215,10 @@ public class MovementController : MonoBehaviour
     {
         if (!isDashing)
         {
+            animator.SetBool("crouch", isCrouched);
             if (isGrounded)
             {
+                
                 animator.SetBool("isFalling", false);
                 if (horizontal!= 0f)
                 {
@@ -216,7 +265,10 @@ public class MovementController : MonoBehaviour
             force.x = 0.5f;
         else
             force.x = -0.5f;
-        force.y = 0.5f;
+        if (force.y >= 0)
+            force.y = 0.5f;
+        else
+            force.y = -0.5f;
         rb.velocity = Vector2.zero;
         rb.AddForce(force*staggerPower);
         canMove = false;
@@ -250,5 +302,18 @@ public class MovementController : MonoBehaviour
         isDashing = false;
         yield return new WaitForSeconds(dashingCooldown);
         canDash = true;
+    }
+    IEnumerator Arrow()
+    {
+        Debug.Log("shoot");
+        canShootArrow = false;
+        GameObject arrow = Instantiate(arrowPrefab, new Vector2(transform.position.x, transform.position.y),isFacingRight?Quaternion.identity:Quaternion.Euler(0f,0f,180f));
+        arrowController ac=arrow.GetComponent<arrowController>();
+        ac.direction =Vector2.right;
+        ac.playerPos = transform.position;
+        ac.distanceMax = arrowMaxDistance;
+
+        yield return new WaitForSeconds(arrowCooldown);
+        canShootArrow = true;
     }
 }

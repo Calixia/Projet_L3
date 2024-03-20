@@ -4,14 +4,17 @@ using UnityEngine;
 
 public class damageHandler : MonoBehaviour
 {
-
+    [Header("health settings")]
     [SerializeField] private int maxHealth = 3;
     [SerializeField] private int currentHealth;
 
+    [Header("on damage settings")]
     [SerializeField] private bool canBeDamaged=true;
     [SerializeField] private int staggerTime;
 
-    [SerializeField] private string ennemyTag, ennemyAttackTag;
+    [Header("damaging tags settings")]
+    [SerializeField] private string ennemyTag;
+    [SerializeField] private string ennemyAttackTag;
     MovementController moveControl;
     Animator animator;
     // Start is called before the first frame update
@@ -30,7 +33,7 @@ public class damageHandler : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (canBeDamaged && (collision.gameObject.CompareTag(ennemyTag) || collision.gameObject.CompareTag(ennemyAttackTag)))
+        if (canBeDamaged && !collision.collider.isTrigger && (collision.gameObject.CompareTag(ennemyTag) || collision.gameObject.CompareTag(ennemyAttackTag)))
         {
             currentHealth--;
             if (currentHealth <= 0)

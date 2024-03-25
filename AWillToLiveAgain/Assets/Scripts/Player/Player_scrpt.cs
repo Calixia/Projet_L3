@@ -438,7 +438,7 @@ public class Player_scrpt : MonoBehaviour
     private void OnCollisionEnter2D(Collision2D collision)
     {
         
-        if (myBxC.IsTouching(collision.collider) && collision.gameObject.CompareTag("Enm1") && !isHit)
+        if (myBxC.IsTouching(collision.collider) && collision.gameObject.layer == 8 && !isHit)
         {
 
             isHit = true;

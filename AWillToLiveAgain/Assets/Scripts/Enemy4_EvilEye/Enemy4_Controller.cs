@@ -18,7 +18,7 @@ public class Enemy4_Controller : MonoBehaviour
     public GameObject thePlayer;
     private Enemy4_Interactions InteractionManager;
     private AnimationClip[] Clips;
-    public GameObject Projectile;
+    public GameObject ProjectilePrefab;
 
 
 
@@ -70,7 +70,7 @@ public class Enemy4_Controller : MonoBehaviour
         myRb = GetComponent<Rigidbody2D>();
         myAni = GetComponent<Animator>();
         InteractionManager = GetComponent<Enemy4_Interactions>();
-
+        ProjectilePrefab = (GameObject)Resources.Load("Prefabs/Projectile", typeof(GameObject));
         theGroundMask = LayerMask.GetMask("Ground");
 
     }
@@ -201,7 +201,7 @@ public class Enemy4_Controller : MonoBehaviour
             if (attackDur > 0.4f)
             {
 
-                Instantiate(Projectile, this.transform.position, this.transform.rotation);
+                Instantiate(ProjectilePrefab, this.transform.position, this.transform.rotation);
                 attackDur = 0.0f;
                 isAttacking = false;
 

@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 1002244219940758815}
   m_Layer: 8
   m_Name: Projectile
-  m_TagString: Enm1
+  m_TagString: Enm4Projectile
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -186,6 +186,4 @@ MonoBehaviour:
   myRb: {fileID: 0}
   myAni: {fileID: 0}
   myCC: {fileID: 0}
-  thePlayer: {fileID: 0}
-  Enemy4: {fileID: 0}
   NearDirToPLayer: {x: 0, y: 0}

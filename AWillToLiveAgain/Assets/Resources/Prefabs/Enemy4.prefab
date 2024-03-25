@@ -18,7 +18,7 @@ GameObject:
   - component: {fileID: 9108858156404237794}
   m_Layer: 8
   m_Name: Enemy4
-  m_TagString: Enm1
+  m_TagString: Enemy4
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -240,7 +240,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   thePlayer: {fileID: 0}
-  Projectile: {fileID: 5782390571053821795, guid: 556a887b50454b24fb2ccfcaa958c2c5, type: 3}
+  ProjectilePrefab: {fileID: 0}
   currentAction: 87
   nextAction: 76
   Health: 1

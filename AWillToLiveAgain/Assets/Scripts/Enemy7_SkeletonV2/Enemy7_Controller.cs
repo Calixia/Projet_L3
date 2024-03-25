@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.VFX;
 
 public class Enemy7_Controller : MonoBehaviour
 {
@@ -18,6 +19,7 @@ public class Enemy7_Controller : MonoBehaviour
     public LayerMask theGroundMask;
     private Enemy7_Interactions InteractionManager;
     private AnimationClip[] Clips;
+    public GameObject fantomPrefab;
 
 
     //Parametrage
@@ -26,6 +28,8 @@ public class Enemy7_Controller : MonoBehaviour
     public char currentAction = 'W';
     public char nextAction = 'L';
 
+    [SerializeField]private bool spawnFantome;
+    
     //Status
     public bool isAttacking = false;
     public bool isDead = false;
@@ -73,10 +77,23 @@ public class Enemy7_Controller : MonoBehaviour
             nextAction = 'R';
         }
 
+        //Chose if to spawn a fantom when it dies or not
+        // probability of 40%
+        int rand2 = UnityEngine.Random.Range(0, 11);
+        if (rand2 < 6)
+        {
+            spawnFantome = true;
+        }
+        else
+        {
+            spawnFantome = false;
+        }
+
         myRb = GetComponent<Rigidbody2D>();
         myAni = GetComponent<Animator>();
         InteractionManager = GetComponent<Enemy7_Interactions>();
         theGroundMask = LayerMask.GetMask("Ground");
+        fantomPrefab = (GameObject)Resources.Load("Prefabs/Enemy2", typeof(GameObject));
         getAnimationDur();
 
     }
@@ -307,6 +324,12 @@ public class Enemy7_Controller : MonoBehaviour
         myRb.velocity = Vector3.zero;
         myRb.gravityScale = 0f;
         isDead = true;
+
+        if (spawnFantome)
+        {
+            Instantiate(fantomPrefab,this.transform.position,transform.rotation);
+        }
+
     }
     private void Mouvement(char Action)
     {

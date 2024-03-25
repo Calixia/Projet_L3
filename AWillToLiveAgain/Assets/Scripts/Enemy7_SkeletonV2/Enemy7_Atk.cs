@@ -14,6 +14,7 @@ public class Enemy7_Atk : MonoBehaviour
     {
 
         myCCs = GetComponents<CircleCollider2D>();
+
         foreach (CircleCollider2D c in myCCs)
         {
             c.enabled = false;

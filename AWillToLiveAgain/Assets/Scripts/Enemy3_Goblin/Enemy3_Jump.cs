@@ -29,13 +29,12 @@ public class Enemy3_Jump : MonoBehaviour
 
             if (!Controller.playerController.gCheck && playerJumped == Vector2.zero && !Controller.playerController.isHit)
             {//catches if the player jumps  for the first time and saves the position
-                //Debug.Log("Start of condition player jumped");
+              
 
                 playerJumped = Controller.thePlayer.transform.position;
 
-                //Debug.Log(playerJumped);
 
-                //Why the fuck FixedUpdate is slower on the prefab
+                
 
                 if (yDistancePlJumpedEnemy() < 0.2f || yDistancePlJumpedEnemy() > 1f)
                 {
@@ -43,9 +42,6 @@ public class Enemy3_Jump : MonoBehaviour
                 }
 
 
-
-                //Debug.Log("end of condition player jumped");
-                //Debug.Log(playerJumped);
 
             }
 

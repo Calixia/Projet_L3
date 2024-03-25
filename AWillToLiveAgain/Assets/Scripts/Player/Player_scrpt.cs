@@ -160,6 +160,11 @@ public class Player_scrpt : MonoBehaviour
     private void FixedUpdate()
     {
 
+        if(myRb.velocity.x > 20)
+        {
+            myRb.velocity = Vector2.zero;
+        }
+
         gCheck = groundChck();
 
 

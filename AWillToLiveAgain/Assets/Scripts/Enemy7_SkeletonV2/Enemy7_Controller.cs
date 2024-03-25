@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Enemy7_Controller : MonoBehaviour
@@ -13,6 +14,7 @@ public class Enemy7_Controller : MonoBehaviour
     public Rigidbody2D myRb;
     public Animator myAni;
     public BoxCollider2D myBxC;
+    public BoxCollider2D myBxTrg;
     public LayerMask theGroundMask;
     private Enemy7_Interactions InteractionManager;
     private AnimationClip[] Clips;
@@ -27,6 +29,7 @@ public class Enemy7_Controller : MonoBehaviour
     //Status
     public bool isAttacking = false;
     public bool isDead = false;
+    public int Health = 2;
 
     //Edge Check
     private bool edgCheck = false;
@@ -35,10 +38,15 @@ public class Enemy7_Controller : MonoBehaviour
     //Obstacule Check
     private bool obsCheck = false;
 
+    public bool isHit;
+
 
     //Timers-Coldowns
+    public float waitTimer = 0.0f;
     public float attackDur = 0.0f;
-    public float timer = 0.0f;
+    public float attackTimer = 0.0f;
+    private float hitTimer = 0.0f;
+    private float hitDur = 0.0f;
     private float timerToDestroy = 0.0f;
 
 
@@ -69,12 +77,12 @@ public class Enemy7_Controller : MonoBehaviour
         myAni = GetComponent<Animator>();
         InteractionManager = GetComponent<Enemy7_Interactions>();
         theGroundMask = LayerMask.GetMask("Ground");
-        getAttackDur();
+        getAnimationDur();
 
     }
 
 
-    private void getAttackDur()
+    private void getAnimationDur()
     {
         //Fonction to find the attack animation and calculate duration
         //We take all the clips in the game
@@ -83,16 +91,21 @@ public class Enemy7_Controller : MonoBehaviour
         foreach (AnimationClip clip in Clips)
         {
 
-            if (clip.name == "Attack_en1")
+            if (clip.name == "Enm7_Attack")
             {
-                //We find the animation clip and stock the duration taht the attack must have to match the animation
+                //We find the animation clip and stock the duration that the attack must have to match the animation
                 attackDur = clip.length;
 
-                //Debug.Log("attack duration:");
-                //Debug.Log(attackDur);
+                
 
-                break;
+            }
 
+            if (clip.name == "Enm7_Hit")
+            {
+                //We find the animation clip and stock the duration that the hit must have to match the animation
+                hitDur = clip.length;
+
+                
             }
         }
 
@@ -101,19 +114,20 @@ public class Enemy7_Controller : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        /*Because the mob always spawns on air to prevent being stuck in the map , every frame we recalculate
-             the y postion of the limits */
-        limitL = new Vector2(limitL.x, transform.position.y);
-        limitR = new Vector2(limitR.x, transform.position.y);
 
 
-        edgCheck = InteractionManager.edgeCheck();
-        gCheck = InteractionManager.groundChck();
-        obsCheck = InteractionManager.obstacleCheck();
+        if (Health == 0 && !isDead)
+        {
+            Dies();
+        }
 
 
         if (!gCheck)
         {
+            /*Because the mob always spawns on air to prevent being stuck in the map , every frame that he is not on the ground we recalculate
+             the y postion of the limits */
+            limitL = new Vector2(limitL.x, transform.position.y);
+            limitR = new Vector2(limitR.x, transform.position.y);
 
             if (currentAction != 'W')
             {
@@ -124,8 +138,10 @@ public class Enemy7_Controller : MonoBehaviour
 
         }
 
-
-
+        if(gCheck && !myRb.isKinematic)
+        {
+            myRb.isKinematic = true;
+        }
 
 
 
@@ -167,11 +183,18 @@ public class Enemy7_Controller : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (!isDead)
+        {
+            edgCheck = InteractionManager.edgeCheck();
+            gCheck = InteractionManager.groundChck();
+            obsCheck = InteractionManager.obstacleCheck();
+        }
+
 
         Interactions();
 
 
-        if (!isDead)
+        if (!isDead && !isHit)
         {
             //if not dead then do something
             Mouvement(currentAction);
@@ -180,11 +203,44 @@ public class Enemy7_Controller : MonoBehaviour
             myAni.SetFloat("walk", Mathf.Abs(myRb.velocity.x));
         }
 
-
+        if (isHit)
+        {
+            hitColdown();
+        }
 
 
     }
 
+
+    private void hitColdown()
+    {
+        hitTimer += Time.deltaTime;
+        if (hitTimer > hitDur)
+        {
+            isHit = false;
+            hitTimer = 0;
+            myBxC.excludeLayers = LayerMask.GetMask("Nothing");
+            if (!myBxTrg.enabled)
+            {
+                myBxTrg.enabled = true;
+            }
+
+        }
+
+    }
+
+
+    public void Hitted()
+    {
+        myRb.velocity = Vector3.zero;
+        isHit = true;
+        myAni.SetTrigger("Hitted");
+        waitTimer = 0f;
+        currentAction = 'W';
+        nextAction = 'L';
+        myBxC.excludeLayers = LayerMask.GetMask("Player");
+
+    }
 
 
 
@@ -192,13 +248,13 @@ public class Enemy7_Controller : MonoBehaviour
     {
 
         //Debug.Log("is waiting");
-        timer += Time.deltaTime;
-        if (timer > 1.5f)
+        waitTimer += Time.deltaTime;
+        if (waitTimer > 1.5f)
         {
             //Wait for 1.5 seconds then change action
             currentAction = nextAction;
             nextAction = 'W';
-            timer = 0.0f;
+            waitTimer = 0.0f;
             //Debug.Log("Enemy Waiting ends");
 
         }
@@ -224,6 +280,9 @@ public class Enemy7_Controller : MonoBehaviour
 
         if (currentAction == 'A')
         {
+            myRb.velocity = Vector2.zero;
+            limitL = new Vector2(transform.position.x - 7, transform.position.y);
+            limitR = new Vector2(transform.position.x + 7, transform.position.y);
             currentAction = 'W';
 
             if (transform.rotation.y == 0)
@@ -278,6 +337,12 @@ public class Enemy7_Controller : MonoBehaviour
 
                 break;
 
+
+            case 'T':
+                // Towards Player position catched
+                InteractionManager.toAttack();
+                break;
+
             case 'A':
 
                 InteractionManager.attack();
@@ -308,6 +373,26 @@ public class Enemy7_Controller : MonoBehaviour
                 currentAction = 'L';
 
                 break;
+
+            case 'T':
+
+                if (myRb.velocity.x > 0)
+                {
+                    myRb.velocity = Vector3.zero;
+                    limitR = new Vector2(transform.position.x + 0.3f, limitL.y);
+                    currentAction = 'L';
+
+                }
+                else
+                {
+                    myRb.velocity = Vector3.zero;
+                    limitL = new Vector2(transform.position.x - 0.3f, limitL.y);
+                    currentAction = 'R';
+                }
+
+                myBxTrg.enabled = true;
+                break;
+
         }
     }
 
@@ -329,6 +414,26 @@ public class Enemy7_Controller : MonoBehaviour
                 currentAction = 'L';
 
                 break;
+
+            case 'T':
+
+                if(myRb.velocity.x > 0)
+                {
+                    myRb.velocity = Vector3.zero;
+                    limitR = new Vector2(transform.position.x + 0.3f, limitL.y);
+                    currentAction = 'L';
+
+                }
+                else
+                {
+                    myRb.velocity = Vector3.zero;
+                    limitL = new Vector2(transform.position.x - 0.3f, limitL.y);
+                    currentAction = 'R';
+                }
+
+                myBxTrg.enabled = true;
+                break;
+                
         }
 
     }

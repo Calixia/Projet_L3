@@ -28,10 +28,9 @@ public class Enemy3 : MonoBehaviour
     private bool edgCheck = false;
     private bool obsCheck = false;
     private bool gCheck = false;
+    private bool notOnsight = false;
 
     private bool onColdown = false;
-
-    private bool notOnsight = false;
     public bool isPursuing = false;
     public bool isAttacking = false;
     public bool Jump = false;
@@ -137,13 +136,6 @@ public class Enemy3 : MonoBehaviour
         gCheck = InteractionManager.groundChck();
        
         
-        if (thePlayer != null && currentAction != 'J' && currentAction != 'A' && (Jump_Script.playerJumped == Vector2.zero && Jump_Script.playerLanded == Vector2.zero) && !isDead)
-        {
-            notOnsight = InteractionManager.PlayerOnSight();
-
-            LOS();
-        }
-
 
         if(currentAction == 'J')
         {
@@ -232,9 +224,7 @@ public class Enemy3 : MonoBehaviour
         {
             currentAction = 'W';
             nextAction = 'P';
-        }
-        //prototype
-        if (!notOnsight)
+        }else
         {
             currentAction = 'P';
             nextAction = 'W';
@@ -284,8 +274,14 @@ public class Enemy3 : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (thePlayer != null && currentAction == 'P' && (Jump_Script.playerJumped == Vector2.zero && Jump_Script.playerLanded == Vector2.zero) && !isDead)
+        {
+            notOnsight = InteractionManager.PlayerOnSight();
 
-        
+            LOS();
+        }
+
+
 
         if (currentAction == 'P')
         {
@@ -298,6 +294,7 @@ public class Enemy3 : MonoBehaviour
 
           
         }
+
 
         if (!isPursuing && !isAttacking)
         {
@@ -445,54 +442,10 @@ public class Enemy3 : MonoBehaviour
             case 'J':
 
 
-                int dir = 1;
 
-                if (transform.position.x >  Jump_Script.playerJumped.x)
-                {
-                    dir = -1;
-
-                }
+                conditionsToJump();
 
 
-                if (Mathf.Abs(Jump_Script.playerJumped.x - transform.position.x) > 0.7f && !Jump)
-                {
-                    if (!gCheck)
-                    {
-                        Jump_Script.playerJumped = Vector2.zero;
-                        Jump_Script.playerLanded = Vector2.zero;
-
-                        currentAction = 'P';
-
-                    }
-
-                    myRb.velocity = new Vector2(8f * dir , myRb.velocity.y);
-
-                }else {
-
-                    if (!Jump)
-                    {
-
-                        if(Mathf.Abs(Jump_Script.playerJumped.y - transform.position.y) > 1f)
-                        {
-
-                            Jump_Script.playerJumped = Vector2.zero;
-                            Jump_Script.playerLanded = Vector2.zero;
-                            currentAction = 'P';
-                        }
-                        else
-                        {
-                            Jump = true;
-                            Jump_Script.playerJumped = this.transform.position;
-                        }
-
-                    }
-                    else
-                    {
-                        myRb.velocity = Vector2.zero;
-                        Jump_Script.guidedJump();
-                    }
-                   
-                 }
                 break;
 
             case 'D':
@@ -516,6 +469,61 @@ public class Enemy3 : MonoBehaviour
         Jump_Script.playerJumped = Vector2.zero;
         Jump_Script.playerLanded = Vector2.zero;
         Jump = false;
+    }
+
+
+    private void conditionsToJump()
+    {
+        int dir = 1;
+
+        if (transform.position.x > Jump_Script.playerJumped.x)
+        {
+            dir = -1;
+
+        }
+
+        if (Mathf.Abs(Jump_Script.playerJumped.x - transform.position.x) > 0.7f && !Jump)
+        {
+            if (!gCheck)
+            {
+                Jump_Script.playerJumped = Vector2.zero;
+                Jump_Script.playerLanded = Vector2.zero;
+
+                currentAction = 'P';
+
+            }
+
+            myRb.velocity = new Vector2(8f * dir, myRb.velocity.y);
+
+        }
+        else
+        {
+
+            if (!Jump)
+            {
+
+                if (Mathf.Abs(Jump_Script.playerJumped.y - transform.position.y) > 1f)
+                {
+
+                    Jump_Script.playerJumped = Vector2.zero;
+                    Jump_Script.playerLanded = Vector2.zero;
+                    currentAction = 'P';
+                }
+                else
+                {
+                    Jump = true;
+                    Jump_Script.playerJumped = this.transform.position;
+                }
+
+            }
+            else
+            {
+                myRb.velocity = Vector2.zero;
+                Jump_Script.guidedJump();
+            }
+
+        }
+
     }
 
 

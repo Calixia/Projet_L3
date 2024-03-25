@@ -13,7 +13,6 @@ public class Projectile_Controller : MonoBehaviour
     public CircleCollider2D myCC;
     private AnimationClip[] Clips;
     private GameObject thePlayer;
-    public GameObject Enemy4;
 
     //Parametrage
     public Vector2 NearDirToPLayer = Vector2.zero;
@@ -35,15 +34,14 @@ public class Projectile_Controller : MonoBehaviour
 
     private void Awake()
     {
-        Enemy4 = getEnemy4();
-        transform.position = Enemy4.transform.position;
+        thePlayer = GameObject.FindGameObjectWithTag("Player");
+        
     }
     void Start()
     {
         myRb = GetComponent<Rigidbody2D>();
         myCC = GetComponent<CircleCollider2D>();
         myAni = GetComponent<Animator>();
-        thePlayer = GameObject.FindGameObjectWithTag("Player") ;
         getExplosionDur();
         getDirNearestPlayer();
 
@@ -64,21 +62,7 @@ public class Projectile_Controller : MonoBehaviour
     }
 
 
-    private GameObject getEnemy4()
-    {
-        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enm1");
-
-        foreach (GameObject enemy in enemies)
-        {
-            if(enemy.name == "Enemy4")
-            {
-                return enemy;
-            }
-        }
-
-        return null;
-    }
-
+ 
     private void getExplosionDur()
     {
         //Fonction to find the Explosion animation and calculate duration

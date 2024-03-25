@@ -80,6 +80,11 @@ public class Enemy2_scrpt : MonoBehaviour
         if (currentAction == 'A')
         {
             objectDirection();
+            myCrlC.radius = 2.4f;
+        }
+        else
+        {
+            myCrlC.radius = 2f;
         }
 
 
@@ -105,10 +110,6 @@ public class Enemy2_scrpt : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if(currentAction == 'A')
-        {
-            getDirNearestPlayer();
-        }
 
          if (!isDead)
         {
@@ -288,28 +289,10 @@ public class Enemy2_scrpt : MonoBehaviour
     }
     private void attack()
     {
-        if (myRb.velocity.x < 8f && myRb.velocity.x > -8f)
-        {
-            myRb.AddForce(NearDirToPLayer * 6f);
-        }
-        else
-        {
+        getDirNearestPlayer();
 
-            myRb.velocity = new Vector2(8f * NearDirToPLayer.x, myRb.velocity.y );
-        }
-
-
-
-        if (myRb.velocity.y < 8f && myRb.velocity.y > -8f)
-        {
-            myRb.AddForce(NearDirToPLayer * 6f);
-        }
-        else
-        {
-
-            myRb.velocity = new Vector2(myRb.velocity.x, 8f * NearDirToPLayer.y) ;
-        }
-
+        myRb.velocity = new Vector2(8f * NearDirToPLayer.x, 8f * NearDirToPLayer.y);
+    
 
     }
 

@@ -5,6 +5,8 @@ using UnityEngine;
 public class Enemy7_Interactions : MonoBehaviour
 {
     private Enemy7_Controller Controller;
+    private Vector3 playerPosCatch;
+    private Vector2 NearDirToPLayer = Vector2.zero;
 
     private void Start()
     {
@@ -12,18 +14,40 @@ public class Enemy7_Interactions : MonoBehaviour
     }
 
 
+    public void toAttack()
+    {
+
+        if (Mathf.Abs(playerPosCatch.x - this.transform.position.x) > 1f)
+        {
+            Debug.Log("going towards player");
+            objectDirection();
+            getDirNearestPlayer();
+            Controller.myRb.velocity = new Vector2(12f * NearDirToPLayer.x, Controller.myRb.velocity.y);
+        }else
+        {
+            Controller.myRb.velocity = Vector2.zero;
+            Controller.myAni.SetTrigger("Attack");
+            Controller.currentAction = 'A';
+        }
+       
+    }
+
     public void attack()
     {
-        Controller.timer += Time.deltaTime;
-        if (Controller.timer > Controller.attackDur - 0.5 && Controller.timer < (Controller.attackDur - 0.2))
+
+        Controller.attackTimer += Time.deltaTime;
+        if (Controller.attackTimer > Controller.attackDur - 0.5 && Controller.attackTimer < (Controller.attackDur - 0.2))
         {
             Controller.isAttacking = true;
         }
-        else if (Controller.timer > (Controller.attackDur - 0.2))
+        else if (Controller.attackTimer > (Controller.attackDur - 0.2))
         {
             Controller.isAttacking = false;
-            Controller.timer = 0.0f;
+            Controller.attackTimer = 0.0f;
+            playerPosCatch = Vector2.zero;
+            Controller.myBxTrg.enabled = true;
             Controller.getDir();
+
         }
 
     }
@@ -75,6 +99,33 @@ public class Enemy7_Interactions : MonoBehaviour
         return obstChckRayCast.collider;
     }
 
+    public bool PlayerOnSight()
+    {
+
+        RaycastHit2D SightRayCast = Physics2D.Raycast(Controller.myBxC.bounds.center, playerPosCatch - Controller.transform.position, Vector2.Distance(Controller.transform.position, playerPosCatch), Controller.theGroundMask);
+
+        return SightRayCast.collider;
+
+    }
+
+    private void getDirNearestPlayer()
+    {
+
+
+        if (playerPosCatch.x < this.transform.position.x)
+        {
+            NearDirToPLayer = new Vector2(-1, 0);
+
+        }
+        else
+        {
+            NearDirToPLayer = new Vector2(1, 0);
+
+        }
+
+    }
+
+
     private void OnDrawGizmos()
     {
 
@@ -111,29 +162,68 @@ public class Enemy7_Interactions : MonoBehaviour
             Gizmos.color = Color.red;
             Gizmos.DrawLine(Controller.myBxC.bounds.center + new Vector3(0.4f * RayCastDir, 0f), Controller.myBxC.bounds.center + new Vector3(0.9f * RayCastDir, 0f));
         }
+
+        if(playerPosCatch != Vector3.zero)
+        {
+            Gizmos.color = Color.black;
+            Gizmos.DrawWireSphere(playerPosCatch, 0.5f);
+        }
+    }
+
+
+
+
+    private void objectDirection()
+    {
+
+        if (Controller.myRb.velocity.x < 0f)
+        {
+            transform.rotation = Quaternion.Euler(0f, 180f, 0f);
+        }
+
+        if (Controller.myRb.velocity.x > 0f)
+        {
+            transform.rotation = Quaternion.Euler(0f, 0f, 0f);
+        }
+
+
+        if (Controller.myRb.velocity.x == 0f)
+        {
+            if (playerPosCatch.x < this.transform.position.x)
+            {
+                transform.rotation = Quaternion.Euler(0f, 180f, 0f);
+            }
+            else
+            {
+                transform.rotation = Quaternion.Euler(0f, 0f, 0f);
+            }
+        }
+
+
+
+
+
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (Controller.myBxC.IsTouching(collision.collider) && collision.gameObject.CompareTag("Player"))
+
+
+
+        if (Controller.myBxC.IsTouching(collision.collider) && collision.collider.gameObject.CompareTag("chAtk") && !Controller.isDead && !Controller.isHit)
         {
-            if (!Controller.isDead)
+            Controller.Health--;
+
+            if (Controller.Health <0)
             {
-                Controller.myRb.isKinematic = true;
+                Controller.Health = 0;
             }
 
-            Controller.myRb.velocity = Vector3.zero;
+            if (Controller.Health > 0)
+            {
+                Controller.Hitted();
+            }
 
-        }
-
-
-
-        if (Controller.myBxC.IsTouching(collision.collider) && collision.collider.gameObject.CompareTag("chAtk") && !Controller.isDead)
-        {
-
-            Debug.Log("enemy is Attacked ");
-
-            Controller.Dies();
 
         }
 
@@ -142,25 +232,24 @@ public class Enemy7_Interactions : MonoBehaviour
 
     }
 
-    private void OnCollisionExit2D(Collision2D collision)
-    {
-
-        if (collision.gameObject.CompareTag("Player"))
-        {
-            Controller.myRb.isKinematic = false;
-
-        }
-
-    }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.CompareTag("Player") && !Controller.isAttacking && !Controller.isDead)
         {
-            Controller.myRb.velocity = Vector3.zero;
-            Controller.currentAction = 'A';
-            Controller.myAni.SetTrigger("Attack");
-            Controller.timer = 0.0f;
+            playerPosCatch = collision.gameObject.transform.position;
+            if (!PlayerOnSight())
+            {
+
+                Controller.myRb.velocity = Vector3.zero;
+                Controller.currentAction = 'T';
+                Controller.waitTimer = 0.0f;
+                Controller.myBxTrg.enabled = false;
+            }
+            else
+            {
+                playerPosCatch = Vector3.zero;
+            }
         }
     }
 }

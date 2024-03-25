@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class Enemy4_Controller : MonoBehaviour
 {
@@ -200,7 +201,7 @@ public class Enemy4_Controller : MonoBehaviour
             if (attackDur > 0.4f)
             {
 
-                Instantiate(Projectile);
+                Instantiate(Projectile, this.transform.position, this.transform.rotation);
                 attackDur = 0.0f;
                 isAttacking = false;
 

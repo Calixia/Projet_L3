@@ -193,9 +193,18 @@ public class Enemy3_Interactions : MonoBehaviour
         if (collision.gameObject.CompareTag("Player") && !Controller.isDead)
         {
             Controller.thePlayer = collision.gameObject;
-            Controller.playerController = collision.gameObject.GetComponent<Player_scrpt>();
-            Controller.myBxTrg.enabled = false;
-            Controller.isPursuing = true;
+            if (!PlayerOnSight())
+            {
+                Controller.playerController = collision.gameObject.GetComponent<Player_scrpt>();
+                Controller.myBxTrg.enabled = false;
+                Controller.isPursuing = true;
+                Controller.currentAction = 'P';
+                Controller.nextAction = 'W';
+            }
+            else
+            {
+                Controller.thePlayer = null;
+            }
         }
     }
 

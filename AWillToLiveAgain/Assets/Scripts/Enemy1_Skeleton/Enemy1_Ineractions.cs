@@ -132,7 +132,7 @@ public class Enemy1_Ineractions : MonoBehaviour
         if (Controller.myBxC.IsTouching(collision.collider) && collision.collider.gameObject.CompareTag("chAtk") && !Controller.isDead)
         {
 
-            Debug.Log("enemy is Attacked ");
+            
             Controller.Health--;
      
 

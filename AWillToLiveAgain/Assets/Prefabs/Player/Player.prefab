@@ -67,6 +67,37 @@ CircleCollider2D:
   m_Offset: {x: 0.0976521, y: -0.021832084}
   serializedVersion: 2
   m_Radius: 0.12726513
+--- !u!1 &1931694959277545733
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4225871700179707967}
+  m_Layer: 3
+  m_Name: dashCollider
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4225871700179707967
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1931694959277545733}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1527070132535904297}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8431049951213573617
 GameObject:
   m_ObjectHideFlags: 0
@@ -103,6 +134,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6178246840519575597}
+  - {fileID: 4225871700179707967}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &2400282249982365048
@@ -263,7 +295,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 8
+  isFacingRight: 1
   jumpPower: 10
+  arrowPrefab: {fileID: 0}
+  arrowTime: 0
+  arrowCooldown: 0
+  arrowMaxDistance: 0
   staggerTime: 1
   staggerPower: 400
   groundLayer:
@@ -274,6 +311,7 @@ MonoBehaviour:
   dashingCooldown: 1
   fallGravityMultiplier: 2
   fastFallGravityMultiplier: 3
+  cameraFollowObject: {fileID: 0}
 --- !u!114 &8239646117043076640
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -287,8 +325,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxHealth: 10
-  currentHealth: 0
   canBeDamaged: 1
   staggerTime: 1
   ennemyTag: Enm1
   ennemyAttackTag: EnnemyAttack
+  hpController: {fileID: 0}

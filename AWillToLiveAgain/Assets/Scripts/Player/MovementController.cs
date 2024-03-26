@@ -44,6 +44,7 @@ public class MovementController : MonoBehaviour
     [SerializeField] private float dashingPower = 24f;
     [SerializeField] private float dashingTime = 0.2f;
     [SerializeField] private float dashingCooldown = 1f;
+    [SerializeField] private Collider2D dashCollider;
     private bool canDash = true;
     private bool isDashing;
 
@@ -74,6 +75,8 @@ public class MovementController : MonoBehaviour
         cameraFollowObjectScript=cameraFollowObject.GetComponent<CameraFollowObject>();
 
         fallSpeedDampingChangeThreshold = CameraManager.instance.fallSpeedYDampingChangeThreshold;
+
+        dashCollider.enabled = false;
     }
     /*est effectué a chaque image affiché par le jeu*/
     private void Update()
@@ -306,6 +309,7 @@ public class MovementController : MonoBehaviour
         animator.SetBool("isDashing", true);
         canDash = false;
         isDashing = true;
+        dashCollider.enabled = true;
         float originalGravity = rb.gravityScale;
         rb.gravityScale = originalGravity * 5f;
         rb.velocity = new Vector2(transform.localScale.x * dashingPower, 0f);
@@ -313,6 +317,7 @@ public class MovementController : MonoBehaviour
         animator.SetBool("isDashing", false);
         rb.gravityScale = originalGravity;
         isDashing = false;
+        dashCollider.enabled = false;
         yield return new WaitForSeconds(dashingCooldown);
         canDash = true;
     }
@@ -336,4 +341,5 @@ public class MovementController : MonoBehaviour
         yield return new WaitForSeconds(arrowCooldown);
         canShootArrow = true;
     }
+    
 }

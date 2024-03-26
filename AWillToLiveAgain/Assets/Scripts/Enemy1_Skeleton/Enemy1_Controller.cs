@@ -109,11 +109,6 @@ public class Enemy1IA_scrpt : Enemy
         }
 
 
-        edgCheck = InteractionManager.edgeCheck();
-        gCheck = InteractionManager.groundChck();
-        obsCheck = InteractionManager.obstacleCheck();
-
-
         if (!gCheck)
         {
             /*Because the mob always spawns on air to prevent being stuck in the map , every frame we recalculate
@@ -128,11 +123,6 @@ public class Enemy1IA_scrpt : Enemy
                 currentAction = 'W';
             }
 
-        }
-
-        if (gCheck && !myRb.isKinematic)
-        {
-            myRb.isKinematic = true;
         }
 
 
@@ -172,9 +162,21 @@ public class Enemy1IA_scrpt : Enemy
     {
 
 
+
         if (!isDead)
         {
+            edgCheck = InteractionManager.edgeCheck();
+            gCheck = InteractionManager.groundChck();
+            obsCheck = InteractionManager.obstacleCheck();
+
             Interactions();
+
+
+            if (gCheck && !myRb.isKinematic)
+            {
+                myRb.velocity = Vector3.zero;
+                myRb.isKinematic = true;
+            }
 
             //if not dead then do something
             Mouvement(currentAction);

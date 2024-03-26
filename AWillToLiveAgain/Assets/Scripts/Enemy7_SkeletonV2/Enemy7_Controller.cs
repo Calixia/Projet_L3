@@ -178,10 +178,15 @@ public class Enemy7_Controller : Enemy1IA_scrpt
             edgCheck = thisInteractionManager.edgeCheck();
             gCheck = thisInteractionManager.groundChck();
             obsCheck = thisInteractionManager.obstacleCheck();
+            Interactions();
         }
 
+        if (gCheck && !myRb.isKinematic)
+        {
+            myRb.velocity = Vector3.zero;
+            myRb.isKinematic = true;
+        }
 
-        Interactions();
 
 
         if (!isDead && !isHit)

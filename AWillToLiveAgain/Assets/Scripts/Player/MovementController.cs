@@ -20,8 +20,12 @@ public class MovementController : MonoBehaviour
 
     [Header("Bow settings")]
     [SerializeField] GameObject arrowPrefab;
+    [SerializeField] private float arrowTime;
+
     [SerializeField] private float arrowCooldown;
     [SerializeField] private float arrowMaxDistance;
+
+    private bool isShootingArrow = false;
 
     private bool canShootArrow = true;
 
@@ -58,7 +62,8 @@ public class MovementController : MonoBehaviour
     Animator animator;
     private void Start()
     {
-        rb= GetComponent<Rigidbody2D>();
+
+        rb = GetComponent<Rigidbody2D>();
         originalGravity = rb.gravityScale;
         fallGravity = rb.gravityScale * fallGravityMultiplier;
 
@@ -73,6 +78,7 @@ public class MovementController : MonoBehaviour
     /*est effectué a chaque image affiché par le jeu*/
     private void Update()
     {
+
         isGrounded = IsGrounded();
         if (isDashing)
         {
@@ -194,14 +200,13 @@ public class MovementController : MonoBehaviour
      */
     private void HandleAttack()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0) && !isShootingArrow)
         {
             animator.SetTrigger("Attack");
 
         }
         if (Input.GetMouseButtonDown(1) && canShootArrow)
         {
-            
             StartCoroutine(Arrow());
         }
     }
@@ -298,27 +303,36 @@ public class MovementController : MonoBehaviour
 
     IEnumerator Dash()
     {
+        animator.SetBool("isDashing", true);
         canDash = false;
         isDashing = true;
         float originalGravity = rb.gravityScale;
         rb.gravityScale = originalGravity * 5f;
         rb.velocity = new Vector2(transform.localScale.x * dashingPower, 0f);
         yield return new WaitForSeconds(dashingTime);
+        animator.SetBool("isDashing", false);
         rb.gravityScale = originalGravity;
         isDashing = false;
         yield return new WaitForSeconds(dashingCooldown);
         canDash = true;
     }
+
     IEnumerator Arrow()
     {
+        animator.SetBool("isShooting",true);
         Debug.Log("shoot");
         canShootArrow = false;
+        isShootingArrow = true;
+        yield return new WaitForSeconds(arrowTime);
+
+        
         GameObject arrow = Instantiate(arrowPrefab, new Vector2(transform.position.x, transform.position.y),isFacingRight?Quaternion.identity:Quaternion.Euler(0f,0f,180f));
         arrowController ac=arrow.GetComponent<arrowController>();
         ac.direction =Vector2.right;
         ac.playerPos = transform.position;
         ac.distanceMax = arrowMaxDistance;
-
+        isShootingArrow = false;
+        animator.SetBool("isShooting", false);
         yield return new WaitForSeconds(arrowCooldown);
         canShootArrow = true;
     }

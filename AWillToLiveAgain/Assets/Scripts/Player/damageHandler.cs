@@ -5,8 +5,8 @@ using UnityEngine;
 public class damageHandler : MonoBehaviour
 {
     [Header("health settings")]
-    [SerializeField] private int maxHealth = 3;
-    [SerializeField] private int currentHealth;
+    [SerializeField] private int maxHealth = 20;
+     public int currentHealth { get; private set; }
 
     [Header("on damage settings")]
     [SerializeField] private bool canBeDamaged=true;
@@ -15,6 +15,7 @@ public class damageHandler : MonoBehaviour
     [Header("damaging tags settings")]
     [SerializeField] private string ennemyTag;
     [SerializeField] private string ennemyAttackTag;
+    [SerializeField] private healthPointUIController hpController;
     MovementController moveControl;
     Animator animator;
     // Start is called before the first frame update
@@ -23,6 +24,7 @@ public class damageHandler : MonoBehaviour
         currentHealth = maxHealth;
         animator = GetComponent<Animator>();
         moveControl = GetComponent<MovementController>();
+        hpController.damage(currentHealth);
     }
 
     // Update is called once per frame
@@ -36,6 +38,7 @@ public class damageHandler : MonoBehaviour
         if (canBeDamaged && !collision.collider.isTrigger && (collision.gameObject.CompareTag(ennemyTag) || collision.gameObject.CompareTag(ennemyAttackTag)))
         {
             currentHealth--;
+            hpController.damage(currentHealth);
             if (currentHealth <= 0)
                 death();
             else {

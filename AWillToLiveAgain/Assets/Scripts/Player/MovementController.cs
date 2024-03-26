@@ -93,6 +93,12 @@ public class MovementController : MonoBehaviour
         {
             CameraManager.instance.LerpYDamping(true);
         }
+        if (rb.velocity.y >= 0f && !CameraManager.instance.IsLerpingYDamping && CameraManager.instance.LerpedFromPlayerFalling)
+        {
+            CameraManager.instance.LerpedFromPlayerFalling = false;
+
+            CameraManager.instance.LerpYDamping(false); 
+        }
         animator.SetFloat("Vy", rb.velocity.y);
         Animate();
     }

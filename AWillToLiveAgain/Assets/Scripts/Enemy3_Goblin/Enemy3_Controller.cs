@@ -3,65 +3,66 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-public class Enemy3 : MonoBehaviour
+public class Enemy3 : Enemy
 {
     // at start
-    public GameObject thePlayer;
-    public Rigidbody2D myRb;
-    public Animator myAni;
-    public BoxCollider2D myBxC;
-    public BoxCollider2D myBxTrg;
-    public LayerMask theGroundMask;
-
-    private Enemy3_Interactions InteractionManager;
-    private Enemy3_Jump Jump_Script;
-
-    public Vector2 limitL, limitR;
-    private AnimationClip[] Clips;
+    public BoxCollider2D myBxC; //Box collider
+    public BoxCollider2D myBxTrg; // Box trigger collider
+ 
+    private Enemy3_Interactions InteractionManager; // Script that manages interaction manager
+    private Enemy3_Jump Jump_Script; // Script to calculate thejump the enemy has to do to pursuit the player
 
 
     //Status
-    public char currentAction = 'W';
-    public char nextAction = 'L';
-    public int Health = 2;
 
+        //Edge Check
     private bool edgCheck = false;
+        //Obstacle Check
     private bool obsCheck = false;
-    private bool gCheck = false;
+        //Player not on sight
     private bool notOnsight = false;
 
     private bool onColdown = false;
     public bool isPursuing = false;
-    public bool isAttacking = false;
     public bool Jump = false;
-    public bool isHit = false;
-
-
-    public bool isDead = false;
 
 
     //parametrage
-    public Vector2 NearDirToPLayer = Vector2.zero;
     public Player_scrpt playerController;
 
-    private float staggerDur = 0f;
-    private float attackDur = 0f;
-
-    //Jump - Berzier cuadratic
+    //Jump - Berzier cuadratic for stagger animation, /stagger -> hitted
     [SerializeField] float staggerSpeed = 0.5f;
         private Vector3 P0hit = Vector2.zero, P1hit = Vector2.zero, P2hit = Vector2.zero;
         private float t2 = 0f;
 
 
     //timers
-    private float waitTimer = 0.0f;
     public float deBugStuck = 0.0f;
     private float attackTimer = 0.0f;
-    private float atkColdown =0.0f;
-    private float toDestroy = 0.0f;
+    private float staggerDur = 0.0f;
 
-    // Start is called before the first frame update
-    void Start()
+    private void Awake()
+    {
+        currentAction = 'W';
+        nextAction = 'L';
+        Health = 2;
+        NearDirToPLayer = Vector2.zero;
+
+        isAttacking = false;
+        isHit = false;
+
+        //Groung Check
+        gCheck = false;
+
+        timerToDestroy = 0.0f;
+        attackColdown = 0.0f;
+        attackDur = 0f;
+        
+
+    }
+
+// Start is called before the first frame update
+void Start()
     {
         thePlayer = null;
 
@@ -239,37 +240,6 @@ public class Enemy3 : MonoBehaviour
 
 
 
-    private void objectDirection()
-    {
-
-        if (myRb.velocity.x < 0f)
-        {
-            transform.rotation = Quaternion.Euler(0f, 180f, 0f);
-        }
-        
-        if(myRb.velocity.x > 0f)
-        {
-            transform.rotation = Quaternion.Euler(0f, 0f, 0f);
-        }
-
-
-        if(myRb.velocity.x == 0f)
-        {
-            if(thePlayer.transform.position.x < this.transform.position.x)
-            {
-                transform.rotation = Quaternion.Euler(0f, 180f, 0f);
-            }
-            else
-            {
-                transform.rotation = Quaternion.Euler(0f, 0f, 0f);
-            }
-        }
-
-
-
-       
-
-    }
 
 
     private void FixedUpdate()
@@ -339,7 +309,9 @@ public class Enemy3 : MonoBehaviour
                
 
             }
-
+            
+            gonnaDestroy();
+            
         }
 
     }
@@ -363,7 +335,7 @@ public class Enemy3 : MonoBehaviour
 
     
 
-    private void getDirNearestPlayer()
+    protected override void getDirNearestPlayer()
     {
 
 
@@ -381,7 +353,7 @@ public class Enemy3 : MonoBehaviour
     }
 
 
-    private void Mouvement(char Action)
+    protected override void  Mouvement(char Action)
     {
         switch (Action)
         {
@@ -417,7 +389,7 @@ public class Enemy3 : MonoBehaviour
                 }
                 else
                 {
-                    attackColdown();
+                    attackOnColdown();
                 }
 
 
@@ -567,22 +539,22 @@ public class Enemy3 : MonoBehaviour
         }
     }
 
-    private void attackColdown()
+    private void attackOnColdown()
     {
         
 
-        atkColdown += Time.deltaTime;
+        attackColdown += Time.deltaTime;
 
-        if(atkColdown > 0.6f)
+        if(attackColdown > 0.6f)
         {
-            atkColdown = 0.0f;
+            attackColdown = 0.0f;
             currentAction = 'P';
             nextAction = 'W';
             onColdown = false;
         }
     }
 
-    private void attack()
+    protected override void attack()
     {
         attackTimer += Time.deltaTime;
 
@@ -600,20 +572,8 @@ public class Enemy3 : MonoBehaviour
     }
 
 
-    private void waitTime()
-    {
-        waitTimer += Time.deltaTime;
-        if (waitTimer > 1.2f)
-        {
-            currentAction = nextAction;
-            nextAction = 'W';
-            waitTimer = 0.0f;
-    
 
-        }
-    }
-
-    private void getDir()
+    public override void getDir()
     {
 
         if (Vector2.Distance(transform.position, limitL) < 0.5f && currentAction == 'L')
@@ -632,7 +592,7 @@ public class Enemy3 : MonoBehaviour
     }
 
 
-    public void Dies()
+    public override void Dies()
     {
         if(myRb.isKinematic){
            myRb.isKinematic = false;
@@ -646,15 +606,7 @@ public class Enemy3 : MonoBehaviour
         myBxC.isTrigger = true;
     }
 
-    private void gonnaDestroy()
-    {
-        toDestroy += Time.deltaTime;
-
-        if (toDestroy > 4)
-        {
-            Destroy(this.gameObject);
-        }
-    }
+ 
 
     private void OnDrawGizmos()
     {

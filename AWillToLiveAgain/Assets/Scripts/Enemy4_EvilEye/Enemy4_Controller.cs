@@ -3,21 +3,21 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-public class Enemy4_Controller : MonoBehaviour
+public class Enemy4_Controller : Enemy
 {
     //Variables to start 
 
     //Horizontal mouvement Limits
-    public Vector2 limitL, limitR;
+  //public Vector2 limitL, limitR;
 
-    public Rigidbody2D myRb;
-    public Animator myAni;
+   // public Rigidbody2D myRb;
+    //public Animator myAni;
     public CircleCollider2D myCC;
     public BoxCollider2D myBxC;
-    public LayerMask theGroundMask;
-    public GameObject thePlayer;
+    //public LayerMask theGroundMask;
+    //public GameObject thePlayer;
     private Enemy4_Interactions InteractionManager;
-    private AnimationClip[] Clips;
+    //private AnimationClip[] Clips;
     public GameObject ProjectilePrefab;
 
 
@@ -25,31 +25,48 @@ public class Enemy4_Controller : MonoBehaviour
     //Parametrage
 
     //Possible actions : W - Waiting, L - Going Left, R - Going Right 
-    public char currentAction = 'W';
-    public char nextAction = 'L';
+    //public char currentAction = 'W';
+    //public char nextAction = 'L';
 
-    public int Health = 1;
+    protected int patrolDistance = 5;
+    protected float enemyMouvSpeed = 5;
+
+    //public int Health = 1;
 
 
     //Status
-    public bool isAttacking = false;
-    public bool isDead = false;
-    private bool gCheck = false;
-    private bool toDestroy = false;
+    //public bool isAttacking = false;
+    //public bool isDead = false;
+    //private bool gCheck = false;
+    protected bool toDestroy = false;
 
 
     //Timers-Coldowns
-    public float attackDur = 0.0f;
-    private float attackColdown = 3.0f;
+    //public float attackDur = 0.0f;
+    //private float attackColdown = 3.0f;
     public float timer = 0.0f;
 
+
+    private void Awake()
+    {
+        currentAction = 'W';
+        nextAction = 'L';
+        Health = 1;
+
+        isAttacking = false;
+        isDead = false;
+        gCheck = false;
+
+        attackDur = 0.0f;
+        attackColdown = 3.0f;
+    }
 
     // Start is called before the first frame update
     void Start()
     {
         //Set Horizontal Limits
-        limitL = new Vector2(transform.position.x - 5, transform.position.y);
-        limitR = new Vector2(transform.position.x + 5, transform.position.y);
+        limitL = new Vector2(transform.position.x - patrolDistance, transform.position.y);
+        limitR = new Vector2(transform.position.x + patrolDistance, transform.position.y);
 
 
         //Chose a Random Direction to go First
@@ -134,17 +151,8 @@ public class Enemy4_Controller : MonoBehaviour
     }
 
 
-    private void gonnaDestroy()
-    {
-        timer += Time.deltaTime;
 
-        if (timer > 4)
-        {
-            Destroy(this.gameObject);
-        }
-    }
-
-    private void Mouvement(char Action)
+    protected override void Mouvement(char Action)
     {
 
         switch (Action)
@@ -158,7 +166,7 @@ public class Enemy4_Controller : MonoBehaviour
             case 'L':
 
                 transform.rotation = Quaternion.Euler(0f, 180f, 0f);
-                myRb.velocity = new Vector2(-5, 0);
+                myRb.velocity = new Vector2(-enemyMouvSpeed, 0);
                 getDir();
 
                 break;
@@ -166,7 +174,7 @@ public class Enemy4_Controller : MonoBehaviour
             case 'R':
 
                 transform.rotation = Quaternion.Euler(0f, 0f, 0f);
-                myRb.velocity = new Vector2(5, 0);
+                myRb.velocity = new Vector2(enemyMouvSpeed, 0);
                 getDir();
 
                 break;
@@ -174,7 +182,7 @@ public class Enemy4_Controller : MonoBehaviour
         }
     }
 
-    private void attack()
+    protected override void attack()
     {
         if (!isAttacking)
         {
@@ -209,24 +217,10 @@ public class Enemy4_Controller : MonoBehaviour
         }
 
     }
-    private void waitTime()
-    {
-
-        //Debug.Log("is waiting");
-        timer += Time.deltaTime;
-        if (timer > 1.5f)
-        {
-            //Wait for 1.5 seconds then change action
-            currentAction = nextAction;
-            nextAction = 'W';
-            timer = 0.0f;
-            //Debug.Log("Enemy Waiting ends");
-
-        }
-    }
+    
 
 
-    private void Dies()
+    public override void Dies()
     {
         isDead = true;
         myCC.isTrigger = true;
@@ -236,40 +230,7 @@ public class Enemy4_Controller : MonoBehaviour
         myRb.gravityScale = 2;
     }
 
-    public void getDir()
-    {
-
-        if (Vector2.Distance(transform.position, limitL) < 0.5f && currentAction == 'L')
-        {
-            myRb.velocity = Vector2.zero;
-            currentAction = 'W';
-            nextAction = 'R';
-
-        }
-        else if (Vector2.Distance(transform.position, limitR) < 0.5f && currentAction == 'R')
-        {
-            myRb.velocity = Vector2.zero;
-            currentAction = 'W';
-            nextAction = 'L';
-        }
-
-
-        if (currentAction == 'A')
-        {
-            currentAction = 'W';
-
-            if (transform.rotation.y == 0)
-            {
-                nextAction = 'R';
-            }
-            else
-            {
-                nextAction = 'L';
-            }
-        }
-
-
-    }
+   
 
 
 

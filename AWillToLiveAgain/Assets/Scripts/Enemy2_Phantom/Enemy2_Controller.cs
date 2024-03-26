@@ -2,32 +2,19 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Enemy2_scrpt : MonoBehaviour
+public class Enemy2_scrpt : Enemy
 {
     // at start
-    public GameObject thePlayer;
-    private Rigidbody2D myRb;
-    public Animator myAni;
-    public BoxCollider2D myBxC;
-    private CircleCollider2D myCrlC;
+    public BoxCollider2D myBxC; //Box Collider
+    private CircleCollider2D myCrlC; //Circle collider trigger/ sonar
 
-    //Controller
-    public char currentAction = 'W';
-    public char nextAction = 'L';
+    //To configure
     public float PatrolSpeed = 0.8f;
-
-    public Vector2 NearDirToPLayer = Vector2.zero;
-
-
-    //Status
-    public int Health = 1;
-    public bool isDead = false;
 
     //Coldowns
     private float timer = 0f;
 
-
-    // cuadratic berzier 
+    // cuadratic berzier  for parabolic mouvement
     private float t = 0f;
 
     private Vector3 P0;
@@ -41,15 +28,16 @@ public class Enemy2_scrpt : MonoBehaviour
     void Start()
     {
 
-        Physics2D.IgnoreLayerCollision(8, 8 , true);
+        //Ignore other enemies collisions
+        Physics2D.IgnoreLayerCollision(8, 8);
 
-       
-      
+        
         myRb = GetComponent<Rigidbody2D>();
         myBxC = GetComponent<BoxCollider2D>();
         myCrlC = GetComponent<CircleCollider2D>();
         myAni = GetComponent<Animator>();
 
+        //Chose a Random Direction to go First
         int rand = UnityEngine.Random.Range(0, 2);
         if (rand == 0)
         {
@@ -60,6 +48,7 @@ public class Enemy2_scrpt : MonoBehaviour
             nextAction = 'R';
         }
 
+        //set Control points  of berzier curve
         setControlPoints(nextAction);
 
     }
@@ -72,13 +61,14 @@ public class Enemy2_scrpt : MonoBehaviour
 
         if (thePlayer != null)
         {
+            //if the player is located then switch to attaack action
             currentAction = 'A';
             nextAction = 'W';
             t = 0f;
         }
 
         if (currentAction == 'A')
-        {
+        {//IF the enemy is attacking it sonar zone gets bigger
             objectDirection();
             myCrlC.radius = 2.4f;
         }
@@ -121,8 +111,9 @@ public class Enemy2_scrpt : MonoBehaviour
         }
     }
 
-    private void objectDirection()
+    protected override void objectDirection()
     {
+        //Methode to manage GHameObject rotation depending whre it is going
 
         if (myRb.velocity.x > 0)
         {
@@ -134,10 +125,10 @@ public class Enemy2_scrpt : MonoBehaviour
         }
 
     }
-    
 
 
-    private void Mouvement(char Action)
+
+    protected override void Mouvement(char Action)
     {
 
         switch (Action)
@@ -170,7 +161,7 @@ public class Enemy2_scrpt : MonoBehaviour
                 
                 transform.rotation = Quaternion.Euler(0f, 180f, 0f);
 
-                //quadratic Berzier exemple
+                //quadratic Berzier
 
                 if (t < 1f)
                 {
@@ -179,7 +170,6 @@ public class Enemy2_scrpt : MonoBehaviour
                     t = t + PatrolSpeed * Time.deltaTime;
 
                 }
-
 
                 getDir();
 
@@ -228,7 +218,7 @@ public class Enemy2_scrpt : MonoBehaviour
 
     }
 
-    public void getDir()
+    public override void getDir()
     {
 
         if (Vector2.Distance(transform.position, P2) < 0.1f)
@@ -273,6 +263,7 @@ public class Enemy2_scrpt : MonoBehaviour
 
 
     private void toResurrect() {
+        //Method called when dead, to ressurect the emnemy after 3 seconds
 
         timer += Time.deltaTime;
 
@@ -287,55 +278,26 @@ public class Enemy2_scrpt : MonoBehaviour
         }
     
     }
-    private void attack()
+    protected override void attack()
     {
+        //Go towards the player to hurt him.
         getDirNearestPlayer();
 
         myRb.velocity = new Vector2(8f * NearDirToPLayer.x, 8f * NearDirToPLayer.y);
-    
-
     }
 
 
-    private void getDirNearestPlayer()
+
+    public override void Dies()
     {
-        /*calculate the nearest direction to the player,
-         * 1. take current enemy pos
-         * 2. add a unit vector from the possible direction to the enemy pos 
-         * 3. compare the distance from this new vector to the player to the distance from the current "nearest" unit vector to the player
-         */
-
-
-
-        Vector2 posToTest, currentNpos;
-
-
-        for (float i = 0; i < (Mathf.PI * 2); i = i + 0.1f)
-        {
-            posToTest = new Vector2(transform.position.x + Mathf.Cos(i), transform.position.y + Mathf.Sin(i));
-            currentNpos = new Vector2(transform.position.x + NearDirToPLayer.x, transform.position.y + NearDirToPLayer.y);
-
-
-            if (Vector2.Distance(posToTest, thePlayer.transform.position) < Vector2.Distance(currentNpos, thePlayer.transform.position))
-            {
-                NearDirToPLayer = new Vector2(Mathf.Cos(i), Mathf.Sin(i));
-            }
-        }
-
-
-    }
-
-    public void Dies()
-    {
-        Debug.Log("phantom is killed temporally");
-
+        //When it dies animation is set, its collider becomes trigger and its velocity is 0
         myAni.SetTrigger("IsKilled");
         myBxC.isTrigger = true;
         myRb.velocity = Vector3.zero;
         isDead = true;
     }
 
-    private void waitTime()
+    protected  override void waitTime()
     {
         
         if(myRb.velocity.x < 0.5f && myRb.velocity.y < 0.5f && myRb.velocity.x > -0.5 && myRb.velocity.y > -0.5f)

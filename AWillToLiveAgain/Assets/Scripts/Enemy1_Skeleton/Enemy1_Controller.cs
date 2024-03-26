@@ -2,60 +2,60 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
+using UnityEditor.Macros;
 using UnityEngine;
 
-public class Enemy1IA_scrpt : MonoBehaviour
+public class Enemy1IA_scrpt : Enemy
 {
 
     //Variables to start 
-
-        //Horizontal mouvement Limits
-    public Vector2 limitL, limitR;
-
-    public Rigidbody2D myRb;
-    public Animator myAni;
-    public BoxCollider2D myBxC;
-    public LayerMask theGroundMask;
-    private Enemy1_Ineractions InteractionManager;
-    private AnimationClip[] Clips;
-
-
+   
+    public BoxCollider2D myBxC; // Box Collider
+    private Enemy1_Ineractions InteractionManager; // Script that manages interaction manager
+   
     //Parametrage
-
-     //Possible actions : W - Waiting, A - Attacking, L - Going Left, R - Going Right 
-    public char currentAction = 'W';
-    public char nextAction = 'L';
-    public int Health = 1;
+    protected int patrolDistance = 4;
+    protected float enemyMouvSpeed = 5;
 
     //Status
-    public bool isAttacking = false;
-    public bool isDead = false;
-
         //Edge Check
-    private bool edgCheck = false;
+    protected bool edgCheck = false;
+    protected bool obsCheck = false;
+
+    private void Awake()
+    {
+        //Possible actions : W - Waiting, A - Attacking, L - Going Left, R - Going Right 
+        currentAction = 'W';
+        nextAction = 'L';
+        Health = 1;
+
+
+
+        //Status
+        isAttacking = false;
+        isDead = false;
+
         //Groung Check
-    private bool gCheck = false;
-        //Obstacule Check
-    private bool obsCheck = false;
+        gCheck = false;
 
+        //Timers-Coldowns
+        attackDur = 0.0f;
+        waitTimer = 0.0f;
+        timerToDestroy = 0.0f;
 
-    //Timers-Coldowns
-    public float attackDur = 0.0f;
-    public float timer = 0.0f;
-    private float timerToDestroy = 0.0f;
+        theGroundMask = LayerMask.GetMask("Ground");
+    }
 
 
     // Start is called before the first frame update
     void Start()
     {
         //Set Horizontal Limits
-        limitL = new Vector2(transform.position.x - 4, transform.position.y);
-        limitR = new Vector2(transform.position.x + 4, transform.position.y);
+        limitL = new Vector2(transform.position.x - patrolDistance, transform.position.y);
+        limitR = new Vector2(transform.position.x + patrolDistance, transform.position.y);
 
         //Ignore other enemies collisions
         Physics2D.IgnoreLayerCollision(8, 8);
-        
-        
 
         //Chose a Random Direction to go First
         int rand = UnityEngine.Random.Range(0, 2);
@@ -69,7 +69,6 @@ public class Enemy1IA_scrpt : MonoBehaviour
         myRb = GetComponent<Rigidbody2D>();
         myAni = GetComponent<Animator>();
         InteractionManager = GetComponent<Enemy1_Ineractions>();
-        theGroundMask = LayerMask.GetMask("Ground");
         getAttackDur();
 
     }
@@ -102,10 +101,7 @@ public class Enemy1IA_scrpt : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        /*Because the mob always spawns on air to prevent being stuck in the map , every frame we recalculate
-             the y postion of the limits */
-        limitL = new Vector2(limitL.x, transform.position.y);
-        limitR = new Vector2(limitR.x, transform.position.y);
+      
 
         if (Health == 0 && !isDead)
         {
@@ -120,8 +116,12 @@ public class Enemy1IA_scrpt : MonoBehaviour
 
         if (!gCheck)
         {
-  
-            if(currentAction != 'W')
+            /*Because the mob always spawns on air to prevent being stuck in the map , every frame we recalculate
+             the y postion of the limits */
+            limitL = new Vector2(limitL.x, transform.position.y);
+            limitR = new Vector2(limitR.x, transform.position.y);
+
+            if (currentAction != 'W')
             {
                 //Just to be sure, if for any reason the GameObject it's in the air it'll wait
                 nextAction = currentAction;
@@ -129,33 +129,30 @@ public class Enemy1IA_scrpt : MonoBehaviour
             }
 
         }
-  
 
-
-
-
-
-        if (isDead)
+        if (gCheck && !myRb.isKinematic)
         {
-            gonnaDestroy();
+            myRb.isKinematic = true;
         }
 
 
-
-
+        if (isDead)
+        {//if the enemy is dead, start timer to destroy
+            gonnaDestroy();
+        }
 
 
     }
 
 
-    private void Interactions()
+    protected void Interactions()
     {
 
         if (!edgCheck)
         {
             //If edge check is fals it would mean that if the enemy continues to walk it will fall
             //There for it will call a function to prevent from falling from plataforms edges
-            edgeFallPrevention();
+            this.edgeFallPrevention();
 
         }
 
@@ -163,7 +160,7 @@ public class Enemy1IA_scrpt : MonoBehaviour
         {
             //if it detects an obstacle created by the map itself then its calls a function to prevent
             //the enemy to walk forever agains a wall
-            obstaclePrevention();
+            this.obstaclePrevention();
         }
 
 
@@ -174,11 +171,11 @@ public class Enemy1IA_scrpt : MonoBehaviour
     private void FixedUpdate()
     {
 
-        Interactions();
-
 
         if (!isDead)
         {
+            Interactions();
+
             //if not dead then do something
             Mouvement(currentAction);
 
@@ -193,69 +190,20 @@ public class Enemy1IA_scrpt : MonoBehaviour
 
 
 
+    
+    
 
-    private void waitTime()
+    public override void Dies()
     {
-        
-        //Debug.Log("is waiting");
-        timer += Time.deltaTime;
-        if (timer > 1.5f)
-        {
-            //Wait for 1.5 seconds then change action
-            currentAction = nextAction;
-            nextAction = 'W';
-            timer = 0.0f;
-            //Debug.Log("Enemy Waiting ends");
-
-        }
-    }
-
-    public void getDir()
-    {
-
-        if (Vector2.Distance(transform.position, limitL) < 0.5f && currentAction == 'L')
-        {
-            myRb.velocity = Vector2.zero;
-            currentAction = 'W';
-            nextAction = 'R';
-
-        }
-        else if (Vector2.Distance(transform.position, limitR) < 0.5f && currentAction == 'R')
-        {
-            myRb.velocity = Vector2.zero;
-            currentAction = 'W';
-            nextAction = 'L';
-        }
-
-
-        if(currentAction == 'A')
-        {
-            currentAction = 'W';
-
-            if (transform.rotation.y == 0)
-            {
-                 nextAction = 'R';
-            }
-            else
-            {
-                nextAction = 'L';
-            }
-        }
-
-
-    }
-
-    public void Dies()
-    {
-        Debug.Log("skeleton is killed");
-
+        //Method called when the enemi is killed. it sets the dead animation, make the enemy collider go trigger, removes gravity so it doesnt fall, set velocity to zero
         myAni.SetTrigger("IsKilled");
         myBxC.isTrigger = true;
         myRb.velocity = Vector3.zero;
         myRb.gravityScale = 0f;
         isDead = true;
     }
-    private void Mouvement(char Action) {
+
+    protected override void Mouvement(char Action) {
         
     
 
@@ -270,7 +218,7 @@ public class Enemy1IA_scrpt : MonoBehaviour
             case 'L' :
               
                 transform.rotation = Quaternion.Euler(0f, 180f, 0f);
-                myRb.velocity = new Vector2(-5, 0);
+                myRb.velocity = new Vector2(-enemyMouvSpeed, 0);
                 getDir();
 
                 break;
@@ -278,23 +226,42 @@ public class Enemy1IA_scrpt : MonoBehaviour
             case 'R':
 
                 transform.rotation = Quaternion.Euler(0f, 0f, 0f);
-                myRb.velocity = new Vector2(5, 0);
+                myRb.velocity = new Vector2(enemyMouvSpeed, 0);
                 getDir();
 
                 break;
 
             case 'A':
 
-                InteractionManager.attack();
+                attack();
 
                 break;
         }
     }
 
-
-
-    private void edgeFallPrevention()
+    protected override void attack()
     {
+        //methode qui prend en compte la duration de l'animation de l'attaque pour synchroniser avec l'activation de attack Boxes
+        waitTimer += Time.deltaTime;
+        if (waitTimer > attackDur - 0.5 && waitTimer < (attackDur - 0.2))
+        {
+            isAttacking = true;
+        }
+        else if (waitTimer > (attackDur - 0.2))
+        {
+            isAttacking = false;
+            waitTimer = 0.0f;
+            getDir();
+        }
+
+    }
+
+
+    protected virtual void edgeFallPrevention()
+    {
+        //Methode pour prevenir que le enemi tombe des platformes
+        //Elle est appele de que le boxcast n'est plus active, voulant dire que il va tomber si il continue son chemin
+        //Ainsi il de que cette fonction est appele l'enemy va tourber et va enregistrer un nouvelle limite pour ca zone a patrouiller
         switch (currentAction)
         {
 
@@ -316,8 +283,11 @@ public class Enemy1IA_scrpt : MonoBehaviour
         }
     }
 
-    private void obstaclePrevention()
+    protected virtual void obstaclePrevention()
     {
+        //Methode pour prevenir que le enemi reste bloque par le map
+        //Elle est appele de que le raycast  est active, voulant dire que il va collisioner avec un obstacle si il continue son chemin
+        //Ainsi il de que cette fonction est appele l'enemy va tourber et va enregistrer un nouvelle limite pour ca zone a patrouiller
         switch (currentAction)
         {
 
@@ -339,16 +309,7 @@ public class Enemy1IA_scrpt : MonoBehaviour
     }
 
 
-    private void gonnaDestroy()
-    {
-        timerToDestroy += Time.deltaTime;
-
-        if (timerToDestroy > 4)
-        {
-            Destroy(this.gameObject);
-        }
-    }
-
+ 
 
 }
 

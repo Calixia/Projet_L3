@@ -1,65 +1,83 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
-public class Enemy5_Controller : MonoBehaviour
+public class Enemy5_Controller : Enemy4_Controller
 {
     //Variables to start 
 
     //Horizontal mouvement Limits
-    public Vector2 limitL, limitR;
+    //public Vector2 limitL, limitR;
 
-    public Rigidbody2D myRb;
-    public Animator myAni;
-    public CircleCollider2D myCC;
-    public BoxCollider2D myBxC;
-    public LayerMask theGroundMask;
-    public GameObject thePlayer;
-    private Enemy5_Interactions InteractionManager;
-    private AnimationClip[] Clips;
+   // public Rigidbody2D myRb;
+    //public Animator myAni;
+    //public CircleCollider2D myCC;
+    //public BoxCollider2D myBxC;
+    //public LayerMask theGroundMask;
+    //public GameObject thePlayer;
+    private Enemy5_Interactions thisInteractionManager;
+    //private AnimationClip[] Clips;
 
 
 
     //Parametrage
 
     //Possible actions : W - Waiting, L - Going Left, R - Going Right 
-    public char currentAction = 'W';
-    public char nextAction = 'L';
-
-    private Vector2 NearDirToPlayer = Vector2.zero;
+   // public char currentAction = 'W';
+    //public char nextAction = 'L';
 
         //berzier curve attack
         [SerializeField] float AttackSpeed = 0.5f;
         public float t = 0f;
         private Vector3 P0 = Vector2.zero, P1 = Vector2.zero, P2 = Vector2.zero;
         
-    public int Health = 2;
-    [SerializeField] private float timeToWait = 1.5f;
+    //public int Health = 2;
     private float gonnaAtkDur = 0.0f;
    
 
     //Status
-    public bool isAttacking = false;
-    public bool isDead = false;
-    private bool gCheck = false;
-    private bool toDestroy = false;
-    public bool isHit = false;
+   // public bool isAttacking = false;
+   // public bool isDead = false;
+    //private bool gCheck = false;
+    //private bool toDestroy = false;
+    //public bool isHit = false;
 
 
     //Timers-Coldowns
-    public float attackDur = 0.0f;
-    private float attackColdown = 3.0f;
+    //public float attackDur = 0.0f;
+    //private float attackColdown = 3.0f;
     private float timerToAttack = 0.0f;
     private float staggerTimer = 0.0f;
-    public float timer = 0.0f;
+   
 
+    private void Awake()
+    {
+        currentAction = 'W';
+        nextAction = 'L';
+        Health = 2;
+        patrolDistance = 8;
+        enemyMouvSpeed = 5;
+
+        NearDirToPLayer = Vector2.zero;
+
+        isAttacking = false;
+        isDead = false;
+        gCheck = false;
+        isHit = false;
+        toDestroy = false;
+
+        attackDur = 0.0f;
+        attackColdown = 3.0f;
+        timer = 0.0f;
+    }
 
     // Start is called before the first frame update
     void Start()
     {
         //Set Horizontal Limits
-        limitL = new Vector2(transform.position.x - 8, transform.position.y);
-        limitR = new Vector2(transform.position.x + 8, transform.position.y);
+        limitL = new Vector2(transform.position.x - patrolDistance, transform.position.y);
+        limitR = new Vector2(transform.position.x + patrolDistance, transform.position.y);
 
 
         //Chose a Random Direction to go First
@@ -79,7 +97,7 @@ public class Enemy5_Controller : MonoBehaviour
         myBxC = GetComponent<BoxCollider2D>();
         myRb = GetComponent<Rigidbody2D>();
         myAni = GetComponent<Animator>();
-        InteractionManager = GetComponent<Enemy5_Interactions>();
+        thisInteractionManager = GetComponent<Enemy5_Interactions>();
 
         theGroundMask = LayerMask.GetMask("Ground");
 
@@ -128,7 +146,7 @@ public class Enemy5_Controller : MonoBehaviour
             else
             {
                 //if is in the ground , destroy
-                Destroy();
+                gonnaDestroy();
             }
 
         }
@@ -165,7 +183,7 @@ public class Enemy5_Controller : MonoBehaviour
     {
         if (!isAttacking)
         {
-            gCheck = InteractionManager.groundChck();
+            gCheck = thisInteractionManager.groundChck();
         }
 
 
@@ -181,52 +199,28 @@ public class Enemy5_Controller : MonoBehaviour
 
     }
 
-    private void objectDirection()
-    {
+ 
 
-        if (myRb.velocity.x < 0)
-        {
-            transform.rotation = Quaternion.Euler(0f, 180f, 0f);
-        }
+    
 
-
-        if (myRb.velocity.x > 0)
-        {
-            transform.rotation = Quaternion.Euler(0f, 0f, 0f);
-        }
-
-
-    }
-
-
-    private void Destroy()
-    {
-        timer += Time.deltaTime;
-
-        if (timer > 4)
-        {
-            Destroy(this.gameObject);
-        }
-    }
-
-    private void getDirNearestPlayer()
+    protected override void getDirNearestPlayer()
     {
 
 
         if (thePlayer.transform.position.x < this.transform.position.x)
         {
-            NearDirToPlayer = new Vector2(-1, 0);
+            NearDirToPLayer = new Vector2(-1, 0);
 
         }
         else
         {
-            NearDirToPlayer = new Vector2(1, 0);
+            NearDirToPLayer = new Vector2(1, 0);
 
         }
 
     }
 
-    private void Mouvement(char Action)
+    protected override void Mouvement(char Action)
     {
 
         switch (Action)
@@ -262,7 +256,7 @@ public class Enemy5_Controller : MonoBehaviour
 
                 if (Mathf.Abs(thePlayer.transform.position.x - transform.position.x) > 0.1f)
                 {
-                    myRb.velocity = new Vector2(6f * NearDirToPlayer.x, myRb.velocity.y);
+                    myRb.velocity = new Vector2(8f * NearDirToPLayer.x, myRb.velocity.y);
 
                 }
                 else
@@ -277,7 +271,7 @@ public class Enemy5_Controller : MonoBehaviour
         }
     }
 
-    private void attack()
+    protected override void attack()
     {
 
         if (!isAttacking && Vector3.Distance(transform.position, thePlayer.transform.position) > 12f && timerToAttack == 0.0f)
@@ -345,21 +339,7 @@ public class Enemy5_Controller : MonoBehaviour
         }
 
     }
-    private void waitTime()
-    {
-
-        //Debug.Log("is waiting");
-        timer += Time.deltaTime;
-        if (timer > 1.5f)
-        {
-            //Wait for 1.5 seconds then change action
-            currentAction = nextAction;
-            nextAction = 'W';
-            timer = 0.0f;
-            
-           
-        }
-    }
+    
 
     private void goingToAttack()
     {
@@ -415,7 +395,7 @@ public class Enemy5_Controller : MonoBehaviour
     }
 
 
-    private void Dies()
+    public override void Dies()
     {
         isDead = true;
         isAttacking = false;
@@ -426,7 +406,7 @@ public class Enemy5_Controller : MonoBehaviour
         myRb.gravityScale = 2;
     }
 
-    public void getDir()
+    public override void getDir()
     {
 
         if (Vector2.Distance(transform.position, limitL) < 0.5f && currentAction == 'L')

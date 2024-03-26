@@ -5,8 +5,6 @@ using UnityEngine;
 public class Enemy7_Interactions : MonoBehaviour
 {
     private Enemy7_Controller Controller;
-    private Vector3 playerPosCatch;
-    private Vector2 NearDirToPLayer = Vector2.zero;
 
     private void Start()
     {
@@ -14,46 +12,10 @@ public class Enemy7_Interactions : MonoBehaviour
     }
 
 
-    public void toAttack()
-    {
-
-        if (Mathf.Abs(playerPosCatch.x - this.transform.position.x) > 1f)
-        {
-            Debug.Log("going towards player");
-            objectDirection();
-            getDirNearestPlayer();
-            Controller.myRb.velocity = new Vector2(12f * NearDirToPLayer.x, Controller.myRb.velocity.y);
-        }else
-        {
-            Controller.myRb.velocity = Vector2.zero;
-            Controller.myAni.SetTrigger("Attack");
-            Controller.currentAction = 'A';
-        }
-       
-    }
-
-    public void attack()
-    {
-
-        Controller.attackTimer += Time.deltaTime;
-        if (Controller.attackTimer > Controller.attackDur - 0.5 && Controller.attackTimer < (Controller.attackDur - 0.2))
-        {
-            Controller.isAttacking = true;
-        }
-        else if (Controller.attackTimer > (Controller.attackDur - 0.2))
-        {
-            Controller.isAttacking = false;
-            Controller.attackTimer = 0.0f;
-            playerPosCatch = Vector2.zero;
-            Controller.myBxTrg.enabled = true;
-            Controller.getDir();
-
-        }
-
-    }
 
     public bool groundChck()
     {
+        //create a boxcast at the feet of the character  to detect ground collisions
         RaycastHit2D GrounfChckBoxCast = Physics2D.BoxCast(Controller.myBxC.bounds.center - new Vector3(0, 0.526f), Controller.myBxC.bounds.size - new Vector3(0, 1f), 0f, Vector2.down, 0f, Controller.theGroundMask);
 
 
@@ -94,6 +56,8 @@ public class Enemy7_Interactions : MonoBehaviour
             RayCastDir = -1;
         }
 
+        //create a boxcast in front of the feet of the caracter to detect ground collisions
+
         RaycastHit2D obstChckRayCast = Physics2D.Raycast(Controller.myBxC.bounds.center + new Vector3(0.4f * RayCastDir, 0f), Vector2.right * RayCastDir, 0.5f, Controller.theGroundMask);
 
         return obstChckRayCast.collider;
@@ -101,29 +65,15 @@ public class Enemy7_Interactions : MonoBehaviour
 
     public bool PlayerOnSight()
     {
+        //Create a Raycast in front the character to detect any obstacle
 
-        RaycastHit2D SightRayCast = Physics2D.Raycast(Controller.myBxC.bounds.center, playerPosCatch - Controller.transform.position, Vector2.Distance(Controller.transform.position, playerPosCatch), Controller.theGroundMask);
+        RaycastHit2D SightRayCast = Physics2D.Raycast(Controller.myBxC.bounds.center, Controller.playerPosCatch - Controller.transform.position, Vector2.Distance(Controller.transform.position, Controller.playerPosCatch), Controller.theGroundMask);
 
         return SightRayCast.collider;
 
     }
 
-    private void getDirNearestPlayer()
-    {
-
-
-        if (playerPosCatch.x < this.transform.position.x)
-        {
-            NearDirToPLayer = new Vector2(-1, 0);
-
-        }
-        else
-        {
-            NearDirToPLayer = new Vector2(1, 0);
-
-        }
-
-    }
+    
 
 
     private void OnDrawGizmos()
@@ -161,66 +111,35 @@ public class Enemy7_Interactions : MonoBehaviour
 
             Gizmos.color = Color.red;
             Gizmos.DrawLine(Controller.myBxC.bounds.center + new Vector3(0.4f * RayCastDir, 0f), Controller.myBxC.bounds.center + new Vector3(0.9f * RayCastDir, 0f));
-        }
 
-        if(playerPosCatch != Vector3.zero)
-        {
             Gizmos.color = Color.black;
-            Gizmos.DrawWireSphere(playerPosCatch, 0.5f);
+            Gizmos.DrawWireSphere(Controller.playerPosCatch, 0.5f);
         }
+
     }
 
 
 
 
-    private void objectDirection()
-    {
-
-        if (Controller.myRb.velocity.x < 0f)
-        {
-            transform.rotation = Quaternion.Euler(0f, 180f, 0f);
-        }
-
-        if (Controller.myRb.velocity.x > 0f)
-        {
-            transform.rotation = Quaternion.Euler(0f, 0f, 0f);
-        }
-
-
-        if (Controller.myRb.velocity.x == 0f)
-        {
-            if (playerPosCatch.x < this.transform.position.x)
-            {
-                transform.rotation = Quaternion.Euler(0f, 180f, 0f);
-            }
-            else
-            {
-                transform.rotation = Quaternion.Euler(0f, 0f, 0f);
-            }
-        }
-
-
-
-
-
-    }
+ 
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
 
 
-
+        //if hitted by the player attack lose health
         if (Controller.myBxC.IsTouching(collision.collider) && collision.collider.gameObject.CompareTag("chAtk") && !Controller.isDead && !Controller.isHit)
         {
             Controller.Health--;
 
             if (Controller.Health <0)
             {
+                //Bug prevention
                 Controller.Health = 0;
             }
 
             if (Controller.Health > 0)
-            {
+            {//if not dead , then call hiited method
                 Controller.Hitted();
             }
 
@@ -235,9 +154,10 @@ public class Enemy7_Interactions : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        //if the player enter trigger box of enemy, start attack action
         if (collision.CompareTag("Player") && !Controller.isAttacking && !Controller.isDead)
         {
-            playerPosCatch = collision.gameObject.transform.position;
+            Controller.playerPosCatch = collision.gameObject.transform.position;
             if (!PlayerOnSight())
             {
 
@@ -248,7 +168,7 @@ public class Enemy7_Interactions : MonoBehaviour
             }
             else
             {
-                playerPosCatch = Vector3.zero;
+                Controller.playerPosCatch = Vector3.zero;
             }
         }
     }

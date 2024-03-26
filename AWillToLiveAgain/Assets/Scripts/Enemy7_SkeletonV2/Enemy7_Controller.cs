@@ -4,62 +4,62 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.VFX;
 
-public class Enemy7_Controller : MonoBehaviour
+public class Enemy7_Controller : Enemy1IA_scrpt
 {
 
     //Variables to start 
 
-    //Horizontal mouvement Limits
-    public Vector2 limitL, limitR;
+    public BoxCollider2D myBxTrg; // box collider that is a trigger
 
-    public Rigidbody2D myRb;
-    public Animator myAni;
-    public BoxCollider2D myBxC;
-    public BoxCollider2D myBxTrg;
-    public LayerMask theGroundMask;
-    private Enemy7_Interactions InteractionManager;
-    private AnimationClip[] Clips;
-    public GameObject fantomPrefab;
+    private Enemy7_Interactions thisInteractionManager; // Script that manages interaction manager
+    public GameObject fantomPrefab; // Fantom to spawn if the conditions are met
 
 
     //Parametrage
 
-    //Possible actions : W - Waiting, A - Attacking, L - Going Left, R - Going Right 
-    public char currentAction = 'W';
-    public char nextAction = 'L';
-
     [SerializeField]private bool spawnFantome;
-    
-    //Status
-    public bool isAttacking = false;
-    public bool isDead = false;
-    public int Health = 2;
 
-    //Edge Check
-    private bool edgCheck = false;
-    //Groung Check
-    private bool gCheck = false;
-    //Obstacule Check
-    private bool obsCheck = false;
-
-    public bool isHit;
-
-
+    public Vector3 playerPosCatch;
+ 
     //Timers-Coldowns
-    public float waitTimer = 0.0f;
-    public float attackDur = 0.0f;
     public float attackTimer = 0.0f;
     private float hitTimer = 0.0f;
     private float hitDur = 0.0f;
-    private float timerToDestroy = 0.0f;
 
+    private void Awake()
+    {
+        //Parametrage
+        patrolDistance = 7;
+        enemyMouvSpeed = 7;
+        currentAction = 'W';
+        nextAction = 'L';
+
+        //private Vector2 NearDirToPLayer = Vector2.zero;
+
+        //Status
+        isAttacking = false;
+        isDead = false;
+        Health = 2;
+
+        //Edge Check
+        edgCheck = false;
+        //Groung Check
+        gCheck = false;
+        //Obstacule Check
+        obsCheck = false;
+
+        //Timers-Coldowns
+        waitTimer = 0.0f;
+        attackDur = 0.0f;
+        timerToDestroy = 0.0f;
+    }
 
     // Start is called before the first frame update
     void Start()
     {
         //Set Horizontal Limits
-        limitL = new Vector2(transform.position.x - 7, transform.position.y);
-        limitR = new Vector2(transform.position.x + 7, transform.position.y);
+        limitL = new Vector2(transform.position.x - patrolDistance, transform.position.y);
+        limitR = new Vector2(transform.position.x + patrolDistance, transform.position.y);
 
         //Ignore other enemies collisions
         Physics2D.IgnoreLayerCollision(8, 8);
@@ -91,9 +91,9 @@ public class Enemy7_Controller : MonoBehaviour
 
         myRb = GetComponent<Rigidbody2D>();
         myAni = GetComponent<Animator>();
-        InteractionManager = GetComponent<Enemy7_Interactions>();
+        thisInteractionManager = GetComponent<Enemy7_Interactions>();
         theGroundMask = LayerMask.GetMask("Ground");
-        fantomPrefab = (GameObject)Resources.Load("Prefabs/Enemy2", typeof(GameObject));
+        fantomPrefab = (GameObject)Resources.Load("Prefabs/Enemy2", typeof(GameObject)); //Find fantome prefab from files
         getAnimationDur();
 
     }
@@ -101,7 +101,7 @@ public class Enemy7_Controller : MonoBehaviour
 
     private void getAnimationDur()
     {
-        //Fonction to find the attack animation and calculate duration
+        //Fonction to find the animations and get their duration
         //We take all the clips in the game
         Clips = myAni.runtimeAnimatorController.animationClips;
 
@@ -155,12 +155,6 @@ public class Enemy7_Controller : MonoBehaviour
 
         }
 
-        if(gCheck && !myRb.isKinematic)
-        {
-            myRb.isKinematic = true;
-        }
-
-
 
         if (isDead)
         {
@@ -175,36 +169,15 @@ public class Enemy7_Controller : MonoBehaviour
     }
 
 
-    private void Interactions()
-    {
-
-        if (!edgCheck)
-        {
-            //If edge check is fals it would mean that if the enemy continues to walk it will fall
-            //There for it will call a function to prevent from falling from plataforms edges
-            edgeFallPrevention();
-
-        }
-
-        if (obsCheck)
-        {
-            //if it detects an obstacle created by the map itself then its calls a function to prevent
-            //the enemy to walk forever agains a wall
-            obstaclePrevention();
-        }
-
-
-
-    }
 
 
     private void FixedUpdate()
     {
         if (!isDead)
         {
-            edgCheck = InteractionManager.edgeCheck();
-            gCheck = InteractionManager.groundChck();
-            obsCheck = InteractionManager.obstacleCheck();
+            edgCheck = thisInteractionManager.edgeCheck();
+            gCheck = thisInteractionManager.groundChck();
+            obsCheck = thisInteractionManager.obstacleCheck();
         }
 
 
@@ -231,6 +204,7 @@ public class Enemy7_Controller : MonoBehaviour
 
     private void hitColdown()
     {
+        //time of iinvulnerability  the enemy takes after being hit
         hitTimer += Time.deltaTime;
         if (hitTimer > hitDur)
         {
@@ -249,6 +223,8 @@ public class Enemy7_Controller : MonoBehaviour
 
     public void Hitted()
     {
+        //function called when hitted
+        // sets its velocity to zero, sets the hit animation, and makes the enemy to wait after the hit coldown timer ends.
         myRb.velocity = Vector3.zero;
         isHit = true;
         myAni.SetTrigger("Hitted");
@@ -261,23 +237,8 @@ public class Enemy7_Controller : MonoBehaviour
 
 
 
-    private void waitTime()
-    {
 
-        //Debug.Log("is waiting");
-        waitTimer += Time.deltaTime;
-        if (waitTimer > 1.5f)
-        {
-            //Wait for 1.5 seconds then change action
-            currentAction = nextAction;
-            nextAction = 'W';
-            waitTimer = 0.0f;
-            //Debug.Log("Enemy Waiting ends");
-
-        }
-    }
-
-    public void getDir()
+    public override void getDir()
     {
 
         if (Vector2.Distance(transform.position, limitL) < 0.5f && currentAction == 'L')
@@ -315,8 +276,11 @@ public class Enemy7_Controller : MonoBehaviour
 
     }
 
-    public void Dies()
+    public override void Dies()
     {
+        //Method called when the enemi is killed. it sets the dead animation, make the enemy collider go trigger, removes gravity so it doesnt fall, set velocity to zero
+        //And if at the start of the creation of the enemy  the variable "spawnFantome" is true then spawn a enemy2 Fantome
+
         Debug.Log("skeleton is killed");
 
         myAni.SetTrigger("IsKilled");
@@ -331,7 +295,7 @@ public class Enemy7_Controller : MonoBehaviour
         }
 
     }
-    private void Mouvement(char Action)
+    protected override void Mouvement(char Action)
     {
 
 
@@ -347,7 +311,7 @@ public class Enemy7_Controller : MonoBehaviour
             case 'L':
 
                 transform.rotation = Quaternion.Euler(0f, 180f, 0f);
-                myRb.velocity = new Vector2(-7, 0);
+                myRb.velocity = new Vector2(-enemyMouvSpeed, 0);
                 getDir();
 
                 break;
@@ -355,7 +319,7 @@ public class Enemy7_Controller : MonoBehaviour
             case 'R':
 
                 transform.rotation = Quaternion.Euler(0f, 0f, 0f);
-                myRb.velocity = new Vector2(7, 0);
+                myRb.velocity = new Vector2(enemyMouvSpeed, 0);
                 getDir();
 
                 break;
@@ -363,20 +327,77 @@ public class Enemy7_Controller : MonoBehaviour
 
             case 'T':
                 // Towards Player position catched
-                InteractionManager.toAttack();
+                toAttack();
                 break;
 
             case 'A':
 
-                InteractionManager.attack();
+                attack();
 
                 break;
         }
     }
 
+    private void toAttack()
+    {
+
+        if (Mathf.Abs(playerPosCatch.x - this.transform.position.x) > 1f)
+        {
+            Debug.Log("going towards player");
+            objectDirection();
+            getDirNearestPlayer();
+            myRb.velocity = new Vector2(12f * NearDirToPLayer.x, myRb.velocity.y);
+        }
+        else
+        {
+            myRb.velocity = Vector2.zero;
+            myAni.SetTrigger("Attack");
+            currentAction = 'A';
+        }
+
+    }
+
+    protected override void attack()
+    {
+
+        //methode qui prend en compte la duration de l'animation de l'attaque pour synchroniser avec l'activation de attack Boxes
 
 
-    private void edgeFallPrevention()
+        attackTimer += Time.deltaTime;
+        if (attackTimer > attackDur - 0.5 && attackTimer < (attackDur - 0.2))
+        {
+            isAttacking = true;
+        }
+        else if (attackTimer > (attackDur - 0.2))
+        {
+            isAttacking = false;
+            attackTimer = 0.0f;
+            playerPosCatch = Vector2.zero;
+            myBxTrg.enabled = true;
+            getDir();
+
+        }
+
+    }
+
+    protected override void getDirNearestPlayer()
+    {
+        // Get nearest vector direction to the player, in this case as the enemy only moves sideways , we only need right and left mouvement, x coordinates
+
+        if (playerPosCatch.x < this.transform.position.x)
+        {
+            NearDirToPLayer = new Vector2(-1, 0);
+
+        }
+        else
+        {
+            NearDirToPLayer = new Vector2(1, 0);
+
+        }
+
+    }
+
+    protected override void edgeFallPrevention()
     {
         switch (currentAction)
         {
@@ -419,7 +440,7 @@ public class Enemy7_Controller : MonoBehaviour
         }
     }
 
-    private void obstaclePrevention()
+    protected override void obstaclePrevention()
     {
         switch (currentAction)
         {
@@ -461,14 +482,32 @@ public class Enemy7_Controller : MonoBehaviour
 
     }
 
-
-    private void gonnaDestroy()
+    protected override void objectDirection()
     {
-        timerToDestroy += Time.deltaTime;
 
-        if (timerToDestroy > 4)
+        if (myRb.velocity.x < 0f)
         {
-            Destroy(this.gameObject);
+            transform.rotation = Quaternion.Euler(0f, 180f, 0f);
         }
+
+        if (myRb.velocity.x > 0f)
+        {
+            transform.rotation = Quaternion.Euler(0f, 0f, 0f);
+        }
+
+
+        if (myRb.velocity.x == 0f)
+        {
+            if (playerPosCatch.x < this.transform.position.x)
+            {
+                transform.rotation = Quaternion.Euler(0f, 180f, 0f);
+            }
+            else
+            {
+                transform.rotation = Quaternion.Euler(0f, 0f, 0f);
+            }
+        }
+
     }
+
 }

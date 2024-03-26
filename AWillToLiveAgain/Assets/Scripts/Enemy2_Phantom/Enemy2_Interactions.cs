@@ -16,6 +16,7 @@ public class Enemy2_Interactions : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        //When it founds the player do an animation
         if (collision.gameObject.CompareTag("Player") && !Controller.isDead)
         {
             Controller.myAni.SetTrigger("Scare");
@@ -25,6 +26,7 @@ public class Enemy2_Interactions : MonoBehaviour
 
     private void OnTriggerStay2D(Collider2D collision)
     {
+        //Every frame that the player is in the circle collider of the fantome, get his position
         if (collision.gameObject.CompareTag("Player") && !Controller.isDead)
         {
             Controller.thePlayer = collision.gameObject;
@@ -34,6 +36,7 @@ public class Enemy2_Interactions : MonoBehaviour
 
     private void OnTriggerExit2D(Collider2D collision)
     {
+        //When the player  gets out of the zone , it lose the reference to it, and go back to patrolling
         if (collision.gameObject.CompareTag("Player"))
         {
 
@@ -46,13 +49,9 @@ public class Enemy2_Interactions : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-
         if (Controller.myBxC.IsTouching(collision.collider) && collision.collider.gameObject.CompareTag("chAtk") && !Controller.isDead)
         {
-
             Controller.Health--;
-
-            Controller.Dies();
 
         }
 

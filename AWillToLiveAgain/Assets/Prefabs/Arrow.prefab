@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 7892961430420801162}
   - component: {fileID: 5546170108026559374}
   - component: {fileID: 3930334812346022397}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Arrow
   m_TagString: chAtk
   m_Icon: {fileID: 0}
@@ -100,6 +100,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 10
+  playerPos: {x: 0, y: 0}
+  distanceMax: 0
   direction: {x: 1, y: 0}
 --- !u!50 &5546170108026559374
 Rigidbody2D:

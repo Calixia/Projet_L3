@@ -35,7 +35,7 @@ public class damageHandler : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (canBeDamaged && !collision.collider.isTrigger && (collision.gameObject.CompareTag(ennemyTag) || collision.gameObject.CompareTag(ennemyAttackTag)))
+        if (canBeDamaged && !collision.collider.isTrigger && (collision.gameObject.CompareTag(ennemyTag)))
         {
             currentHealth--;
             hpController.damage(currentHealth);

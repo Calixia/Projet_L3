@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
-using UnityEditor.Macros;
 using UnityEngine;
 
 public class Enemy1IA_scrpt : Enemy

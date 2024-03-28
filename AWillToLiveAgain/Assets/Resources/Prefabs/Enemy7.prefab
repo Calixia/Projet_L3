@@ -18,7 +18,7 @@ GameObject:
   - component: {fileID: 7587591554744972685}
   m_Layer: 8
   m_Name: Enemy7
-  m_TagString: Enemy7
+  m_TagString: Enm1
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -241,25 +241,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 34480b26a4289a3489e59154ab2ddfd5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  limitL: {x: 0, y: 0}
-  limitR: {x: 0, y: 0}
   myRb: {fileID: 0}
   myAni: {fileID: 0}
-  myBxC: {fileID: 2030802224767125080}
-  myBxTrg: {fileID: 3662564985461760358}
   theGroundMask:
     serializedVersion: 2
     m_Bits: 0
-  fantomPrefab: {fileID: 0}
+  limitL: {x: 0, y: 0}
+  limitR: {x: 0, y: 0}
   currentAction: 87
   nextAction: 76
-  spawnFantome: 0
+  Health: 2
+  NearDirToPLayer: {x: 0, y: 0}
+  thePlayer: {fileID: 0}
   isAttacking: 0
   isDead: 0
-  Health: 2
   isHit: 0
   waitTimer: 0
-  attackDur: 0
+  myBxC: {fileID: 2030802224767125080}
+  myBxTrg: {fileID: 3662564985461760358}
+  fantomPrefab: {fileID: 0}
+  spawnFantome: 0
+  playerPosCatch: {x: 0, y: 0, z: 0}
   attackTimer: 0
 --- !u!114 &7587591554744972685
 MonoBehaviour:

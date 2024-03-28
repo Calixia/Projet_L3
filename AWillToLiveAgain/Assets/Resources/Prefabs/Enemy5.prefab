@@ -18,7 +18,7 @@ GameObject:
   - component: {fileID: 2463402505397954151}
   m_Layer: 8
   m_Name: Enemy5
-  m_TagString: Enemy5
+  m_TagString: Enm1
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -231,27 +231,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 12c441ab25372624194ebbf0c289aeeb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  limitL: {x: 0, y: 0}
-  limitR: {x: 0, y: 0}
   myRb: {fileID: 0}
   myAni: {fileID: 0}
-  myCC: {fileID: 0}
-  myBxC: {fileID: 0}
   theGroundMask:
     serializedVersion: 2
     m_Bits: 0
-  thePlayer: {fileID: 0}
+  limitL: {x: 0, y: 0}
+  limitR: {x: 0, y: 0}
   currentAction: 87
   nextAction: 76
-  AttackSpeed: 0.85
-  t: 0
   Health: 2
-  timeToWait: 1.5
+  NearDirToPLayer: {x: 0, y: 0}
+  thePlayer: {fileID: 0}
   isAttacking: 0
   isDead: 0
   isHit: 0
-  attackDur: 0
+  waitTimer: 0
+  myCC: {fileID: 0}
+  myBxC: {fileID: 0}
+  ProjectilePrefab: {fileID: 0}
   timer: 0
+  AttackSpeed: 0.85
+  t: 0
 --- !u!114 &2463402505397954151
 MonoBehaviour:
   m_ObjectHideFlags: 0

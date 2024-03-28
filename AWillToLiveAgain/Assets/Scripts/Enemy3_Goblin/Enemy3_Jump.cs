@@ -26,13 +26,15 @@ public class Enemy3_Jump : MonoBehaviour
     {
         if (playerJumped == Vector2.zero || playerLanded == Vector2.zero)
         {
+            Debug.Log(Controller.playerController.isGrounded);
 
-            if (!Controller.playerController.gCheck && playerJumped == Vector2.zero && !Controller.playerController.isHit)
+            if (!Controller.playerController.isGrounded && playerJumped == Vector2.zero )
             {//catches if the player jumps  for the first time and saves the position
               
 
                 playerJumped = Controller.thePlayer.transform.position;
 
+                Debug.Log(playerJumped);        
 
                 
 
@@ -45,7 +47,7 @@ public class Enemy3_Jump : MonoBehaviour
 
             }
 
-            if (Controller.playerController.gCheck && playerJumped != Vector2.zero)
+            if (Controller.playerController.isGrounded && playerJumped != Vector2.zero)
             {//Catches if the player has landed after jumping
                 if (Controller.thePlayer.transform.position.y > playerJumped.y)
                 {

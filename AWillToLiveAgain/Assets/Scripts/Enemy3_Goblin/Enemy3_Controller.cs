@@ -28,7 +28,7 @@ public class Enemy3 : Enemy
 
 
     //parametrage
-    public Player_scrpt playerController;
+    public MovementController playerController;
 
     //Jump - Berzier cuadratic for stagger animation, /stagger -> hitted
     [SerializeField] float staggerSpeed = 0.5f;
@@ -52,7 +52,7 @@ public class Enemy3 : Enemy
         isHit = false;
 
         //Groung Check
-        gCheck = false;
+        //gCheck = false;
 
         timerToDestroy = 0.0f;
         attackColdown = 0.0f;
@@ -122,21 +122,7 @@ void Start()
             objectDirection();
         }
          
-        
-
-        if (!isPursuing && !isAttacking)
-        {
-            limitL = new Vector2(limitL.x, transform.position.y);
-            limitR = new Vector2(limitR.x, transform.position.y);
-
-            edgCheck = InteractionManager.edgeCheck();
-            obsCheck = InteractionManager.obstacleCheck();
-
-        }
-     
-        gCheck = InteractionManager.groundChck();
-       
-        
+                
 
         if(currentAction == 'J')
         {
@@ -251,6 +237,22 @@ void Start()
             LOS();
         }
 
+        gCheck = InteractionManager.groundChck();
+
+        if (!isPursuing && !isAttacking)
+        {
+            limitL = new Vector2(limitL.x, transform.position.y);
+            limitR = new Vector2(limitR.x, transform.position.y);
+
+            edgCheck = InteractionManager.edgeCheck();
+            obsCheck = InteractionManager.obstacleCheck();
+            Interactions();
+
+        }
+
+        
+
+
 
 
         if (currentAction == 'P')
@@ -265,13 +267,6 @@ void Start()
           
         }
 
-
-        if (!isPursuing && !isAttacking)
-        {
-
-            Interactions();
-
-        }
 
 
 

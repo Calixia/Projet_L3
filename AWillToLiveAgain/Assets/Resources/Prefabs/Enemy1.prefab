@@ -220,21 +220,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 575c7362563f7e441a1273bcbd1c8045, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  distToTravel: 3
-  limitL: {x: 0, y: 0}
-  limitR: {x: 0, y: 0}
   myRb: {fileID: 0}
   myAni: {fileID: 0}
-  myBxC: {fileID: 7927826639827551886}
   theGroundMask:
     serializedVersion: 2
     m_Bits: 0
+  limitL: {x: 0, y: 0}
+  limitR: {x: 0, y: 0}
   currentAction: 87
   nextAction: 76
+  Health: 0
+  NearDirToPLayer: {x: 0, y: 0}
+  thePlayer: {fileID: 0}
   isAttacking: 0
   isDead: 0
-  attackDur: 0
-  timer: 0
+  isHit: 0
+  waitTimer: 0
+  myBxC: {fileID: 7927826639827551886}
 --- !u!114 &-4039790856703664773
 MonoBehaviour:
   m_ObjectHideFlags: 0

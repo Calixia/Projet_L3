@@ -18,7 +18,7 @@ GameObject:
   - component: {fileID: 4589637394081057132}
   m_Layer: 8
   m_Name: Enemy2
-  m_TagString: Enemy2
+  m_TagString: Enm1
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -230,15 +230,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ca1bfea97fbae342a277c58d1682780, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  thePlayer: {fileID: 0}
+  myRb: {fileID: 0}
   myAni: {fileID: 0}
-  myBxC: {fileID: 0}
+  theGroundMask:
+    serializedVersion: 2
+    m_Bits: 0
+  limitL: {x: 0, y: 0}
+  limitR: {x: 0, y: 0}
   currentAction: 87
   nextAction: 76
-  PatrolSpeed: 0.85
-  NearDirToPLayer: {x: 0, y: 0}
   Health: 1
+  NearDirToPLayer: {x: 0, y: 0}
+  thePlayer: {fileID: 0}
+  isAttacking: 0
   isDead: 0
+  isHit: 0
+  waitTimer: 0
+  myBxC: {fileID: 0}
+  PatrolSpeed: 0.85
 --- !u!114 &4589637394081057132
 MonoBehaviour:
   m_ObjectHideFlags: 0

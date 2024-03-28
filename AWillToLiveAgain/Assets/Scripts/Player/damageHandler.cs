@@ -31,11 +31,12 @@ public class damageHandler : MonoBehaviour
     void Update()
     {
         
+        
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (canBeDamaged && !collision.collider.isTrigger && (collision.gameObject.CompareTag(ennemyTag)))
+        if (canBeDamaged && !collision.collider.isTrigger && (collision.gameObject.CompareTag(ennemyTag)) && moveControl.myboxCollider.IsTouching(collision.collider))
         {
             currentHealth--;
             hpController.damage(currentHealth);
@@ -44,8 +45,6 @@ public class damageHandler : MonoBehaviour
             else {
                 if (collision.gameObject.CompareTag(ennemyTag))
                     stagger(collision.gameObject.transform.position);
-                if (collision.gameObject.CompareTag(ennemyAttackTag))
-                    stagger(collision.gameObject.GetComponentInParent<Transform>().position);
             }
 
         }

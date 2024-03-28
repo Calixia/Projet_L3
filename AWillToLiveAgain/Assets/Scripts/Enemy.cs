@@ -23,7 +23,7 @@ public abstract class Enemy : MonoBehaviour
     public GameObject thePlayer; // The player Game object
 
     //Ground Check
-    protected bool gCheck; // Variable for check if the Enemy is on the ground 
+    public bool gCheck; // Variable for check if the Enemy is on the ground 
 
     //Status
     public bool isAttacking;

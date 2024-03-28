@@ -18,7 +18,7 @@ public class Enemy3_Interactions : MonoBehaviour
     public bool groundChck()
     {
         RaycastHit2D GrounfChckBoxCast = Physics2D.BoxCast(Controller.myBxC.bounds.center - new Vector3(0, 0.55f), Controller.myBxC.bounds.size - new Vector3(0f, 1f), 0f, Vector2.down, 0.09f, Controller.theGroundMask);
-
+        Debug.Log(GrounfChckBoxCast.collider);
 
         return GrounfChckBoxCast.collider;
     }
@@ -195,7 +195,7 @@ public class Enemy3_Interactions : MonoBehaviour
             Controller.thePlayer = collision.gameObject;
             if (!PlayerOnSight())
             {
-                Controller.playerController = collision.gameObject.GetComponent<Player_scrpt>();
+                Controller.playerController = collision.gameObject.GetComponent<MovementController>();
                 Controller.myBxTrg.enabled = false;
                 Controller.isPursuing = true;
                 Controller.currentAction = 'P';

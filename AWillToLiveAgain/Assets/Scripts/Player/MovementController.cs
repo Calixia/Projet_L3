@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class MovementController : MonoBehaviour
 {
@@ -16,6 +17,7 @@ public class MovementController : MonoBehaviour
     
 
     private Rigidbody2D rb;
+    public BoxCollider2D myboxCollider;
     private Collider2D _collider;
 
     [Header("Bow settings")]
@@ -36,7 +38,7 @@ public class MovementController : MonoBehaviour
 
     [Header("Grounded settings")]
     [SerializeField] private LayerMask groundLayer;
-    private bool isGrounded;
+    public bool isGrounded;
 
     private int idleCheck=5;
 
@@ -70,9 +72,10 @@ public class MovementController : MonoBehaviour
 
         fastFallGravity = rb.gravityScale * fastFallGravityMultiplier;
         animator= GetComponent<Animator>();
-        _collider= GetComponent<Collider2D>();
+        _collider = GetComponent<Collider2D>();
+        myboxCollider = GetComponent<BoxCollider2D>();
 
-        cameraFollowObjectScript=cameraFollowObject.GetComponent<CameraFollowObject>();
+        cameraFollowObjectScript = cameraFollowObject.GetComponent<CameraFollowObject>();
 
         fallSpeedDampingChangeThreshold = CameraManager.instance.fallSpeedYDampingChangeThreshold;
 
@@ -81,6 +84,14 @@ public class MovementController : MonoBehaviour
     /*est effectué a chaque image affiché par le jeu*/
     private void Update()
     {
+        if(Input.GetKeyDown(KeyCode.Escape)){
+            Application.Quit();
+        }
+
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            SceneManager.LoadScene("hum");
+        }
 
         isGrounded = IsGrounded();
         if (isDashing)

@@ -62,6 +62,10 @@ public class MovementController : MonoBehaviour
     private CameraFollowObject cameraFollowObjectScript;
     private float fallSpeedDampingChangeThreshold;
 
+    private damageHandler dmghandler;
+    [Header("other settings")]
+    [SerializeField] private string ennemyLayer;
+
     Animator animator;
     private void Start()
     {
@@ -78,6 +82,8 @@ public class MovementController : MonoBehaviour
         cameraFollowObjectScript = cameraFollowObject.GetComponent<CameraFollowObject>();
 
         fallSpeedDampingChangeThreshold = CameraManager.instance.fallSpeedYDampingChangeThreshold;
+
+        dmghandler = GetComponent<damageHandler>();
 
         dashCollider.enabled = false;
     }
@@ -321,14 +327,18 @@ public class MovementController : MonoBehaviour
         canDash = false;
         isDashing = true;
         dashCollider.enabled = true;
+        dmghandler.canBeDamaged = false;
+        Physics2D.IgnoreLayerCollision(gameObject.layer, LayerMask.NameToLayer(ennemyLayer), true);
         float originalGravity = rb.gravityScale;
         rb.gravityScale = originalGravity * 5f;
         rb.velocity = new Vector2(transform.localScale.x * dashingPower, 0f);
         yield return new WaitForSeconds(dashingTime);
+        dmghandler.canBeDamaged = true;
         animator.SetBool("isDashing", false);
         rb.gravityScale = originalGravity;
         isDashing = false;
         dashCollider.enabled = false;
+        Physics2D.IgnoreLayerCollision(gameObject.layer, LayerMask.NameToLayer(ennemyLayer), false);
         yield return new WaitForSeconds(dashingCooldown);
         canDash = true;
     }

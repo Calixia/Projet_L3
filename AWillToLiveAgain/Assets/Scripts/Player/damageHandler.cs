@@ -9,7 +9,7 @@ public class damageHandler : MonoBehaviour
      public int currentHealth { get; private set; }
 
     [Header("on damage settings")]
-    [SerializeField] private bool canBeDamaged=true;
+    public bool canBeDamaged=true;
     [SerializeField] private int staggerTime;
 
     [Header("damaging tags settings")]

@@ -327,6 +327,7 @@ MonoBehaviour:
   fallGravityMultiplier: 2
   fastFallGravityMultiplier: 3
   cameraFollowObject: {fileID: 0}
+  ennemyLayer: Enemies
 --- !u!114 &8239646117043076640
 MonoBehaviour:
   m_ObjectHideFlags: 0

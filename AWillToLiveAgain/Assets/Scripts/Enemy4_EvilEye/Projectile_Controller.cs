@@ -186,10 +186,15 @@ public class Projectile_Controller : MonoBehaviour
             myRb.velocity = Vector2.zero;
             isDead = true;
             myAni.SetTrigger("dead");
-            myCC.isTrigger = true;
+            StartCoroutine(setIsTrigger());
         }
     }
 
+    IEnumerator setIsTrigger()
+    {
+        yield return new WaitForSeconds(0.05f);
+        myCC.isTrigger = true;
+    }
 
     private void OnDrawGizmos()
     {

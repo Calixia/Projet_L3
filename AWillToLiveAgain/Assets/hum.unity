@@ -211,6 +211,18 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7125178177044120727, guid: 84628c15978de00458706b998d1021c5, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7125178177044120727, guid: 84628c15978de00458706b998d1021c5, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: -120
+      objectReference: {fileID: 0}
+    - target: {fileID: 7125178177044120727, guid: 84628c15978de00458706b998d1021c5, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 112
+      objectReference: {fileID: 0}
     - target: {fileID: 8789179797638135370, guid: 84628c15978de00458706b998d1021c5, type: 3}
       propertyPath: m_Name
       value: Canvas
@@ -11233,6 +11245,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Enemy4 (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 1882543761699129435, guid: 71997212b44736d4c90d4b476dbb4039, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5552109201432104056, guid: 71997212b44736d4c90d4b476dbb4039, type: 3}
       propertyPath: m_LocalPosition.x
       value: -13.569387
@@ -11289,6 +11305,10 @@ PrefabInstance:
     - target: {fileID: 1882543761699129435, guid: 71997212b44736d4c90d4b476dbb4039, type: 3}
       propertyPath: m_Name
       value: Enemy4
+      objectReference: {fileID: 0}
+    - target: {fileID: 1882543761699129435, guid: 71997212b44736d4c90d4b476dbb4039, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5552109201432104056, guid: 71997212b44736d4c90d4b476dbb4039, type: 3}
       propertyPath: m_LocalPosition.x
@@ -11445,6 +11465,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Enemy2
       objectReference: {fileID: 0}
+    - target: {fileID: 943063694527133071, guid: c87dceea356f71849b4aef48c4f9720d, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 9143812047836464184, guid: c87dceea356f71849b4aef48c4f9720d, type: 3}
       propertyPath: m_LocalPosition.x
       value: -40.69
@@ -11518,7 +11542,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1368692333283699644, guid: f88eaaf94e22b874bbd7c4448d2d1660, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -37.713154
+      value: -37.71316
       objectReference: {fileID: 0}
     - target: {fileID: 1368692333283699644, guid: f88eaaf94e22b874bbd7c4448d2d1660, type: 3}
       propertyPath: m_LocalPosition.y
@@ -11589,6 +11613,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Enemy1
       objectReference: {fileID: 0}
+    - target: {fileID: 1103494084507268882, guid: bf78c68469cf1144ba3e3b156ccafb8d, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8781427254642807806, guid: bf78c68469cf1144ba3e3b156ccafb8d, type: 3}
       propertyPath: m_LocalPosition.x
       value: 10.8
@@ -11650,6 +11678,10 @@ PrefabInstance:
     - target: {fileID: 1382831911908764215, guid: f4b56f490663e224180b1dd68640fe3d, type: 3}
       propertyPath: m_Name
       value: Enemy5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1382831911908764215, guid: f4b56f490663e224180b1dd68640fe3d, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8432127675592852816, guid: f4b56f490663e224180b1dd68640fe3d, type: 3}
       propertyPath: m_LocalPosition.x
@@ -11864,6 +11896,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Enemy1 (3)
       objectReference: {fileID: 0}
+    - target: {fileID: 1103494084507268882, guid: bf78c68469cf1144ba3e3b156ccafb8d, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8781427254642807806, guid: bf78c68469cf1144ba3e3b156ccafb8d, type: 3}
       propertyPath: m_LocalPosition.x
       value: -52.847095
@@ -11920,6 +11956,10 @@ PrefabInstance:
     - target: {fileID: 2609935990916054542, guid: 426de9d96c8730841b21da9ccc565e69, type: 3}
       propertyPath: m_Name
       value: Enemy7
+      objectReference: {fileID: 0}
+    - target: {fileID: 2609935990916054542, guid: 426de9d96c8730841b21da9ccc565e69, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8733906048826025293, guid: 426de9d96c8730841b21da9ccc565e69, type: 3}
       propertyPath: m_LocalPosition.x
@@ -11978,6 +12018,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Enemy1 (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 1103494084507268882, guid: bf78c68469cf1144ba3e3b156ccafb8d, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8781427254642807806, guid: bf78c68469cf1144ba3e3b156ccafb8d, type: 3}
       propertyPath: m_LocalPosition.x
       value: -39.81
@@ -12034,6 +12078,10 @@ PrefabInstance:
     - target: {fileID: 2609935990916054542, guid: 426de9d96c8730841b21da9ccc565e69, type: 3}
       propertyPath: m_Name
       value: Enemy7 (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 2609935990916054542, guid: 426de9d96c8730841b21da9ccc565e69, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8733906048826025293, guid: 426de9d96c8730841b21da9ccc565e69, type: 3}
       propertyPath: m_LocalPosition.x
@@ -12131,6 +12179,10 @@ PrefabInstance:
     - target: {fileID: 5305646055386310731, guid: 65e9d133d717c3d45a421b8e9e9cc7b9, type: 3}
       propertyPath: m_Name
       value: Enemy3
+      objectReference: {fileID: 0}
+    - target: {fileID: 5305646055386310731, guid: 65e9d133d717c3d45a421b8e9e9cc7b9, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
